@@ -218,7 +218,6 @@ export async function updateTask(id: string, values: TaskValues) {
     throw new Error("You can only update tasks that you created or are assigned to.");
   }
 
-  // @ts-expect-error - approval is included from getTaskOrThrow
   if (existing.approval?.status === "DECLINED" && user.role !== "SUPER_ADMIN") {
     throw new Error("This task has been declined and cannot be edited.");
   }
