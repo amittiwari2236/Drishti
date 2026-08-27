@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { await prisma.taskApproval.deleteMany({}); await prisma.task.deleteMany({}); console.log('Tasks deleted'); } main().finally(() => prisma.$disconnect());
