@@ -25,8 +25,8 @@ export function ProposalForm({
   const [mediaFile, setMediaFile] = useState<File | null>(null);
 
   const form = useForm<ProposalValues>({
-    // @ts-expect-error - zodResolver type mismatch with react-hook-form versions
-    resolver: zodResolver(proposalSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(proposalSchema) as any,
     defaultValues: {
       title: proposal?.title ?? "",
       type: proposal?.type ?? "WORKSHOP",
