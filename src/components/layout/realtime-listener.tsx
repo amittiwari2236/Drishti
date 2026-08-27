@@ -36,7 +36,7 @@ export function RealtimeListener({ role, userId }: { role: string; userId: strin
                 <span className="font-medium text-foreground">{String(event.task?.createdBy)}</span> ({event.role}) wants to create a new task:
               </p>
               <div className="font-medium text-foreground italic mt-2 bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-md border text-xs line-clamp-2">
-                "{String(event.task?.title)}"
+                &quot;{String(event.task?.title)}&quot;
               </div>
               <p className="text-[10px] text-muted-foreground mt-1.5 font-medium uppercase tracking-wider">
                 {new Date(String(event.task?.createdAt)).toLocaleString()}
@@ -95,7 +95,7 @@ export function RealtimeListener({ role, userId }: { role: string; userId: strin
                 <span className="font-medium text-foreground">{String(event.task?.createdBy)}</span> ({event.role}) submitted a proposal:
               </p>
               <div className="font-medium text-foreground italic mt-2 bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-md border text-xs line-clamp-2">
-                "{String(event.task?.title)}"
+                &quot;{String(event.task?.title)}&quot;
               </div>
               <p className="text-[10px] text-muted-foreground mt-1.5 font-medium uppercase tracking-wider">
                 {new Date(String(event.task?.createdAt)).toLocaleString()}

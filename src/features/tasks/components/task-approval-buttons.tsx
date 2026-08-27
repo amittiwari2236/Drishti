@@ -15,8 +15,8 @@ export function TaskApprovalButtons({ taskId }: { taskId: string }) {
       setIsApproving(true);
       await approveTask(taskId);
       toast.success("Task approved and is now active.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to approve task.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to approve task.");
     } finally {
       setIsApproving(false);
     }
@@ -27,8 +27,8 @@ export function TaskApprovalButtons({ taskId }: { taskId: string }) {
       setIsDeclining(true);
       await declineTask(taskId);
       toast.success("Task declined.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to decline task.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to decline task.");
     } finally {
       setIsDeclining(false);
     }

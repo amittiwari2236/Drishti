@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { markTaskAsReview, completeTask } from "@/features/tasks/actions";
+import { completeTask } from "@/features/tasks/actions";
 import { toast } from "sonner";
 import type { TaskStatus } from "@prisma/client";
 
@@ -16,25 +16,14 @@ export function TaskStateButtons({
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleReview = async () => {
-    try {
-      setIsUpdating(true);
-      await markTaskAsReview(taskId);
-      toast.success("Task moved to Review.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update task.");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const handleComplete = async () => {
     try {
       setIsUpdating(true);
       await completeTask(taskId);
       toast.success("Event completed successfully.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to complete task.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to complete task.");
     } finally {
       setIsUpdating(false);
     }

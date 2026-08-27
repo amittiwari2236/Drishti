@@ -6,7 +6,6 @@ import type { TaskStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   requireUser,
-  requirePermission,
   assertCompanyAccess,
 } from "@/lib/access";
 import { can } from "@/lib/permissions";
@@ -219,7 +218,7 @@ export async function updateTask(id: string, values: TaskValues) {
     throw new Error("You can only update tasks that you created or are assigned to.");
   }
 
-  // @ts-ignore - approval is included from getTaskOrThrow
+  // @ts-expect-error - approval is included from getTaskOrThrow
   if (existing.approval?.status === "DECLINED" && user.role !== "SUPER_ADMIN") {
     throw new Error("This task has been declined and cannot be edited.");
   }
@@ -551,7 +550,7 @@ export async function approveTask(taskId: string) {
     },
   });
 
-  const updatedTask = await prisma.task.update({
+  await prisma.task.update({
     where: { id: taskId },
     data: { status: "REVIEW" },
   });
