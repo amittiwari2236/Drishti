@@ -15,7 +15,7 @@ import type { Role } from "@prisma/client";
 import {
   PERMISSION_DEFINITIONS,
   DEFAULT_ROLE_PERMISSIONS,
-} from "@/lib/permissions";
+} from "@/lib/permission-constants";
 import {
   updateRolePermission,
   resetRolePermissions,
