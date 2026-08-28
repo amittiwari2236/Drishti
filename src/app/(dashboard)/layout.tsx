@@ -4,7 +4,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { RealtimeListener } from "@/components/layout/realtime-listener";
-import { getAllowedHrefs } from "@/config/nav";
+import { getAllowedHrefs } from "@/lib/nav-server";
 
 export default async function DashboardLayout({
   children,
