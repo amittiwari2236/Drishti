@@ -23,7 +23,7 @@ export type TaskRealtimeEvent = {
   timestamp: number;
 };
 
-// Use global singleton so it survives Next.js development hot-reloads
+// Use global singleton so it survives Next.js Webpack chunk duplication across Server Actions and API Routes
 const globalForEvents = globalThis as unknown as {
   taskEventEmitter?: EventEmitter;
 };
@@ -34,9 +34,7 @@ export const taskEventEmitter =
 // Allow unlimited listeners for SSE clients
 taskEventEmitter.setMaxListeners(100);
 
-if (process.env.NODE_ENV !== "production") {
-  globalForEvents.taskEventEmitter = taskEventEmitter;
-}
+globalForEvents.taskEventEmitter = taskEventEmitter;
 
 /**
  * Broadcast an event to all connected realtime clients.

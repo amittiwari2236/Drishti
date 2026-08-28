@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { subscribeToTaskEvents, type TaskRealtimeEvent } from "@/lib/realtime";
+import { subscribeToTaskEvents, taskEventEmitter, type TaskRealtimeEvent } from "@/lib/realtime";
 
 export const dynamic = "force-dynamic";
 
@@ -80,15 +80,11 @@ export async function GET(req: Request | NextRequest) {
   });
 }
 
-// Bridge endpoint for Next.js Server Actions (which run in a different isolate)
-// They can POST here, and we emit it on this isolate's local EventEmitter!
 export async function POST(req: Request) {
   try {
     const event = await req.json();
     // Directly emit on the global EventEmitter for this isolate
-    import("@/lib/realtime").then((m) => {
-      m.taskEventEmitter.emit("task-event", event);
-    });
+    taskEventEmitter.emit("task-event", event);
     return new Response("Broadcasted", { status: 200 });
   } catch (err) {
     return new Response("Bad Request", { status: 400 });
