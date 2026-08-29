@@ -165,7 +165,7 @@ export async function assignMentors(projectId: string, userIds: string[]) {
     where: {
       id: { in: userIds },
       companyId: project.companyId,
-      role: { in: ["MENTOR", "COORDINATOR", "COMPANY_ADMIN"] },
+      role: { in: ["EXECUTIVE", "SENIOR", "MANAGER"] },
     },
     select: { id: true },
   });
@@ -206,7 +206,7 @@ export async function assignStudents(projectId: string, userIds: string[]) {
     where: {
       id: { in: userIds },
       companyId: project.companyId,
-      role: "STUDENT",
+      role: "INTERN",
     },
     select: { id: true },
   });

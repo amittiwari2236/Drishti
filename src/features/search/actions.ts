@@ -33,7 +33,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
 
   const scope = await companyFilter(user);
   const contains = { contains: q, mode: "insensitive" as const };
-  const isStudent = user.role === "STUDENT";
+  const isStudent = user.role === "INTERN";
 
   const [projects, proposals, students, tasks, companies] = await Promise.all([
     prisma.project.findMany({
@@ -58,7 +58,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
       : prisma.user.findMany({
           where: {
             ...scope,
-            role: "STUDENT",
+            role: "INTERN",
             deletedAt: null,
             OR: [{ name: contains }, { email: contains }],
           },
@@ -77,7 +77,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
       take: 5,
       orderBy: { updatedAt: "desc" },
     }),
-    user.role === "SUPER_ADMIN"
+    user.role === "MANAGER"
       ? prisma.company.findMany({
           where: { deletedAt: null, name: contains },
           select: { id: true, name: true, industry: true },

@@ -81,14 +81,13 @@ export default async function ProposalDetailPage({
   const isAssignedMentor =
     (proposal.teacherId && proposal.teacherId === user.id) ||
     (proposal.reviewerId && proposal.reviewerId === user.id) ||
-    (proposal.createdById === user.id && user.role === "MENTOR");
+    (proposal.createdById === user.id && user.role === "EXECUTIVE");
   const canReview = can(user, "proposal:review") || isAssignedMentor;
   const canEdit =
-    user.role !== "STUDENT" ||
+    user.role !== "INTERN" ||
     (proposal.createdById === user.id && (proposal.status === "DRAFT" || proposal.status === "REWORK"));
   const canDelete =
-    user.role === "SUPER_ADMIN" ||
-    user.role === "COMPANY_ADMIN" ||
+    user.role === "MANAGER" ||
     proposal.createdById === user.id;
 
   const teacherDisplay = proposal.teacher?.name || proposal.teacherName || "Unassigned";

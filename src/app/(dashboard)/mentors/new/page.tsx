@@ -7,11 +7,11 @@ import { MentorForm } from "@/features/mentors/components/mentor-form";
 export const metadata: Metadata = { title: "Add Staff User" };
 
 export default async function NewMentorPage() {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "COORDINATOR");
+  const user = await requireRole("MANAGER", "MANAGER", "SENIOR");
   const scope = await companyScope(user);
 
   const companies =
-    user.role === "SUPER_ADMIN" && !scope
+    user.role === "MANAGER" && !scope
       ? await prisma.company.findMany({
           where: { status: "ACTIVE" },
           select: { id: true, name: true },
@@ -27,7 +27,7 @@ export default async function NewMentorPage() {
       />
       <MentorForm
         companies={companies}
-        canCreateAdmin={user.role !== "COORDINATOR"}
+        canCreateAdmin={user.role !== "SENIOR"}
       />
     </div>
   );

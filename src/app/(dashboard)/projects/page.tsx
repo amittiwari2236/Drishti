@@ -32,7 +32,7 @@ export default async function ProjectsPage() {
     where: {
       ...scope,
       // Students only see their own projects.
-      ...(user.role === "STUDENT"
+      ...(user.role === "INTERN"
         ? { students: { some: { userId: user.id } } }
         : {}),
     },
@@ -50,15 +50,14 @@ export default async function ProjectsPage() {
   });
 
   const canCreate =
-    user.role === "SUPER_ADMIN" ||
-    user.role === "COMPANY_ADMIN";
+    user.role === "MANAGER";
 
   return (
     <>
       <PageHeader
         title="Projects"
         description={
-          user.role === "STUDENT"
+          user.role === "INTERN"
             ? "Projects you are working on."
             : "Internship projects across teams and batches."
         }
@@ -78,7 +77,7 @@ export default async function ProjectsPage() {
           icon={FolderKanban}
           title="No projects yet"
           description={
-            user.role === "STUDENT"
+            user.role === "INTERN"
               ? "You will see projects here once a mentor assigns you."
               : "Create a project and assign mentors and students to it."
           }

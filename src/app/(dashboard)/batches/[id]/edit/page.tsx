@@ -13,7 +13,7 @@ export default async function EditBatchPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "COORDINATOR");
+  const user = await requireRole("MANAGER", "MANAGER", "SENIOR");
   const { id } = await params;
   const batch = await prisma.batch.findUnique({ where: { id } });
   if (!batch) notFound();

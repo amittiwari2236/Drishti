@@ -50,7 +50,7 @@ export default async function AnalyticsPage() {
     attendanceGrouped,
     topStudentsRaw,
   ] = await Promise.all([
-    prisma.user.count({ where: { role: "STUDENT", ...scope } }),
+    prisma.user.count({ where: { role: "INTERN", ...scope } }),
     prisma.project.count({ where: { ...scope, deletedAt: null, status: "ACTIVE" } }),
     prisma.task.count({ where: { ...scope, deletedAt: null, status: "COMPLETED" } }),
     prisma.dailyLog.count({

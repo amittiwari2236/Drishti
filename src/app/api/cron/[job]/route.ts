@@ -44,7 +44,7 @@ async function isNonWorkingDay(date: Date): Promise<boolean> {
 /** Fetch all active students. */
 async function getActiveStudents() {
   return prisma.user.findMany({
-    where: { role: "STUDENT", isActive: true, deletedAt: null },
+    where: { role: "INTERN", isActive: true, deletedAt: null },
     select: { id: true, companyId: true },
   });
 }
@@ -75,7 +75,7 @@ export async function GET(
     }
 
     const students = await prisma.user.findMany({
-      where: { role: "STUDENT", isActive: true, deletedAt: null, companyId: { not: null } },
+      where: { role: "INTERN", isActive: true, deletedAt: null, companyId: { not: null } },
       select: { id: true, companyId: true },
     });
 
@@ -117,7 +117,7 @@ export async function GET(
   if (job === "reminders") {
     const today = utcDay();
     const students = await prisma.user.findMany({
-      where: { role: "STUDENT", isActive: true, deletedAt: null },
+      where: { role: "INTERN", isActive: true, deletedAt: null },
       select: { id: true },
     });
 

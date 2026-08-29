@@ -84,7 +84,7 @@ export async function createTask(values: TaskValues) {
     _max: { order: true },
   });
 
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isSuperAdmin = user.role === "MANAGER";
 
   const task = await prisma.task.create({
     data: {
@@ -160,7 +160,7 @@ export async function createTask(values: TaskValues) {
     });
   } else {
     const superAdmins = await prisma.user.findMany({
-      where: { role: "SUPER_ADMIN" },
+      where: { role: "MANAGER" },
       select: { id: true },
     });
     const saIds = superAdmins.map((u) => u.id);
@@ -206,7 +206,7 @@ export async function updateTask(id: string, values: TaskValues) {
   // can update any task in their company scope.
   // Students and basic users can only update tasks they created or are assigned to.
   const isFullManager =
-    user.role === "SUPER_ADMIN" ||
+    user.role === "MANAGER" ||
     can(user, "task:assign") ||
     can(user, "task:delete");
 
@@ -218,7 +218,7 @@ export async function updateTask(id: string, values: TaskValues) {
     throw new Error("You can only update tasks that you created or are assigned to.");
   }
 
-  if (existing.approval?.status === "DECLINED" && user.role !== "SUPER_ADMIN") {
+  if (existing.approval?.status === "DECLINED" && user.role !== "MANAGER") {
     throw new Error("This task has been declined and cannot be edited.");
   }
 
@@ -298,7 +298,7 @@ export async function deleteTask(id: string) {
   // can delete any task in their company scope.
   // Regular users can only delete tasks they created.
   const isFullManager =
-    user.role === "SUPER_ADMIN" ||
+    user.role === "MANAGER" ||
     can(user, "task:assign");
 
   if (!isFullManager && existing.createdById !== user.id) {
@@ -349,7 +349,7 @@ export async function moveTask(
   const task = await getTaskOrThrow(id);
   assertCompanyAccess(user, task.companyId);
 
-  if (user.role === "STUDENT") {
+  if (user.role === "INTERN") {
     if (task.assigneeId !== user.id) {
       throw new Error("You can only move your own tasks.");
     }
@@ -449,7 +449,7 @@ export async function deleteComment(commentId: string) {
     where: { id: commentId },
   });
   if (!comment) throw new Error("Comment not found");
-  if (comment.authorId !== user.id && user.role === "STUDENT") {
+  if (comment.authorId !== user.id && user.role === "INTERN") {
     throw new Error("You can only delete your own comments.");
   }
 
@@ -504,7 +504,7 @@ export async function deleteAttachment(attachmentId: string) {
     where: { id: attachmentId },
   });
   if (!attachment) throw new Error("Attachment not found");
-  if (attachment.uploadedById !== user.id && user.role === "STUDENT") {
+  if (attachment.uploadedById !== user.id && user.role === "INTERN") {
     throw new Error("You can only delete your own attachments.");
   }
 
@@ -520,7 +520,7 @@ export async function deleteAttachment(attachmentId: string) {
 
 export async function approveTask(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     throw new Error("Only Super Admins can approve tasks.");
   }
 
@@ -599,7 +599,7 @@ export async function approveTask(taskId: string) {
 
 export async function declineTask(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     throw new Error("Only Super Admins can decline tasks.");
   }
 
@@ -659,7 +659,7 @@ export async function declineTask(taskId: string) {
 
 export async function markTaskAsReview(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     throw new Error("Only Super Admins can move tasks to Review.");
   }
   const task = await getTaskOrThrow(taskId);
@@ -698,7 +698,7 @@ export async function markTaskAsReview(taskId: string) {
 
 export async function completeTask(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     throw new Error("Only Super Admins can complete tasks.");
   }
   const task = await getTaskOrThrow(taskId);

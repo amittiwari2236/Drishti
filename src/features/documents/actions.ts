@@ -80,7 +80,7 @@ export async function deleteDocument(id: string) {
   const doc = await prisma.document.findUnique({ where: { id } });
   if (!doc) throw new Error("Document not found");
   assertCompanyAccess(user, doc.companyId);
-  if (user.role === "STUDENT" && doc.ownerId !== user.id) {
+  if (user.role === "INTERN" && doc.ownerId !== user.id) {
     throw new Error("You can only remove your own documents.");
   }
 

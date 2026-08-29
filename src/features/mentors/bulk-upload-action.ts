@@ -14,9 +14,9 @@ const rowSchema = z.object({
   phone: z.string().max(20).optional(),
   designation: z.string().max(120).optional(),
   role: z
-    .enum(["MENTOR", "COORDINATOR", "COMPANY_ADMIN"])
+    .enum(["EXECUTIVE", "SENIOR", "MANAGER"])
     .optional()
-    .default("MENTOR"),
+    .default("EXECUTIVE"),
 });
 
 // ─── Simple CSV parser ─────────────────────────────────────────
@@ -68,7 +68,7 @@ export async function bulkUploadMentors(
   formData: FormData
 ): Promise<BulkUploadMentorResult> {
   const actor = await requirePermission("user:create");
-  if (actor.role !== "SUPER_ADMIN") {
+  if (actor.role !== "MANAGER") {
     throw new Error("Only Super Admin can bulk upload staff.");
   }
 
@@ -99,7 +99,7 @@ export async function bulkUploadMentors(
       password: raw.password || undefined,
       phone: raw.phone || undefined,
       designation: raw.designation || undefined,
-      role: (raw.role?.toUpperCase() as "MENTOR" | "COORDINATOR" | "COMPANY_ADMIN") || "MENTOR",
+      role: (raw.role?.toUpperCase() as "EXECUTIVE" | "SENIOR" | "MANAGER") || "EXECUTIVE",
     });
 
     if (!parsed.success) {

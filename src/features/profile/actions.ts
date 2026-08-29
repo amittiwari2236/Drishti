@@ -20,7 +20,7 @@ export async function updateProfile(values: ProfileValues) {
     },
   });
 
-  if (user.role === "STUDENT") {
+  if (user.role === "INTERN") {
     const profile = await prisma.studentProfile.findUnique({
       where: { userId: user.id },
       select: { id: true },

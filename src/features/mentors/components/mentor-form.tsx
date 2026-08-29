@@ -47,7 +47,7 @@ export function MentorForm({
       password: "",
       phone: "",
       designation: "",
-      role: "MENTOR",
+      role: "EXECUTIVE",
       companyId: undefined,
     },
   });
@@ -64,8 +64,8 @@ export function MentorForm({
   }
 
   const roles = canCreateAdmin
-    ? (["MENTOR", "COORDINATOR", "COMPANY_ADMIN"] as const)
-    : (["MENTOR", "COORDINATOR"] as const);
+    ? (["EXECUTIVE", "SENIOR", "MANAGER"] as const)
+    : (["EXECUTIVE", "SENIOR"] as const);
 
   return (
     <Form {...form}>

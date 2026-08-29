@@ -21,11 +21,15 @@ export type SessionUser = {
 /** Cached per-request session lookup with PostgreSQL authoritative verification. */
 export const getSession = cache(async () => {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user?.id) return null;
+  
+  const customUserId = (await cookies()).get("drishti_user_id")?.value;
+  
+  if (!session?.user?.id && !customUserId) return null;
+  const userId = session?.user?.id || customUserId;
 
   // Always verify fresh, authoritative role and status from PostgreSQL
   let dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId as string },
     select: {
       id: true,
       name: true,
@@ -38,7 +42,7 @@ export const getSession = cache(async () => {
   });
 
   // Fallback lookup by email if id changed across database seeds
-  if (!dbUser && session.user.email) {
+  if (!dbUser && session?.user?.email) {
     dbUser = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
@@ -66,7 +70,7 @@ export const getSession = cache(async () => {
     role: dbUser.role,
     companyId: dbUser.companyId,
   };
-  return { user, session: session.session };
+  return { user, session: session?.session || {} as any };
 });
 
 /** Require an authenticated user or redirect to login. */
@@ -96,13 +100,13 @@ export async function requirePermission(
 
 /**
  * Resolve the company scope for the current user.
- * - SUPER_ADMIN: uses the company selected in the switcher cookie (may be null = all).
+ * - MANAGER: uses the company selected in the switcher cookie (may be null = all).
  * - Everyone else: bound to their own companyId (or null if unassigned).
  */
 export async function companyScope(
   user: SessionUser
 ): Promise<string | null> {
-  if (user.role === "SUPER_ADMIN") {
+  if (user.role === "MANAGER") {
     const store = await cookies();
     const selected = store.get(ACTIVE_COMPANY_COOKIE)?.value;
     if (!selected || selected === "all") return null;
@@ -135,7 +139,7 @@ export async function resolveCompanyForWrite(
   user: SessionUser,
   requestedCompanyId?: string | null
 ): Promise<string> {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     if (!user.companyId) throw new Error("Your account has no company assigned.");
     return user.companyId;
   }
@@ -156,7 +160,7 @@ export function assertCompanyAccess(
   user: SessionUser,
   entityCompanyId: string | null | undefined
 ) {
-  if (user.role === "SUPER_ADMIN") return;
+  if (user.role === "MANAGER") return;
   if (!entityCompanyId || entityCompanyId !== user.companyId) {
     throw new Error("Access denied: entity belongs to another company.");
   }

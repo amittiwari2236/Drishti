@@ -14,7 +14,7 @@ export default async function NewProposalPage() {
     prisma.user.findMany({
       where: {
         ...scope,
-        role: { in: ["MENTOR", "COORDINATOR", "COMPANY_ADMIN", "SUPER_ADMIN"] },
+        role: { in: ["EXECUTIVE", "SENIOR", "MANAGER", "MANAGER"] },
         isActive: true,
         deletedAt: null,
       },

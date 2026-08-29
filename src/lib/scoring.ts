@@ -214,7 +214,7 @@ export async function computeStudentScore(
 export async function snapshotAllStudents(companyId?: string): Promise<number> {
   const students = await prisma.user.findMany({
     where: {
-      role: "STUDENT",
+      role: "INTERN",
       isActive: true,
       deletedAt: null,
       companyId: companyId ?? { not: null },

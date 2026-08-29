@@ -47,14 +47,17 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: LayoutDashboard,
         permission: "feature:dashboard",
       },
+      /*
       {
         title: "Companies",
         href: "/companies",
         icon: Building2,
         permission: "feature:companies",
       },
+      */
     ],
   },
+  /*
   {
     label: "Internship & Teams",
     items: [
@@ -84,6 +87,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
+  */
   {
     label: "Work & Tracking",
     items: [
@@ -100,7 +104,7 @@ export const NAV_GROUPS: NavGroup[] = [
         permission: "feature:tasks",
       },
       {
-        title: "Proposals",
+        title: "Events",
         href: "/propose",
         icon: Compass,
         permission: "feature:propose",
@@ -131,6 +135,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
+  /*
   {
     label: "Insights & Assets",
     items: [
@@ -160,6 +165,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
+  */
   {
     label: "Super Admin & System",
     items: [

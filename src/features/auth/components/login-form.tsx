@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { loginWithPragya } from "@/features/auth/server-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [pending, startTransition] = useTransition();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -39,32 +40,26 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginValues) {
     setLoading(true);
-    try {
-      const rawInput = values.email.trim();
-      const emailToUse = rawInput.includes("@") ? rawInput : `${rawInput.toLowerCase()}@example.com`;
+    startTransition(async () => {
+      try {
+        const rawInput = values.email.trim();
+        const emailToUse = rawInput.includes("@") ? rawInput : `${rawInput.toLowerCase()}@example.com`;
 
-      const res = await authClient.signIn.email({
-        email: emailToUse,
-        password: values.password,
-        rememberMe: values.rememberMe,
-      });
+        const res = await loginWithPragya(emailToUse, values.password);
 
-      if (res?.error) {
-        toast.error(res.error.message ?? "Invalid email or password");
-        return;
+        if (res?.error) {
+          toast.error(res.error);
+          setLoading(false);
+          return;
+        }
+        router.push(searchParams.get("from") ?? "/dashboard");
+        router.refresh();
+      } catch (err: unknown) {
+        console.error("Sign in failed:", err);
+        toast.error("Network error, please try again.");
+        setLoading(false);
       }
-      router.push(searchParams.get("from") ?? "/dashboard");
-      router.refresh();
-    } catch (err: unknown) {
-      console.error("Sign in failed:", err);
-      const message =
-        err instanceof Error
-          ? err.message
-          : "An unexpected error occurred during sign in. Please check your credentials.";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    });
   }
 
   return (

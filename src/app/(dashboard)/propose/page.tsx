@@ -31,7 +31,7 @@ export default async function ProposePage({
     where: {
       ...scope,
       deletedAt: null,
-      ...(user.role === "STUDENT"
+      ...(user.role === "INTERN"
         ? { OR: [{ createdById: user.id }, { status: { in: ["APPROVED", "CONVERTED"] } }] }
         : {}),
       ...(typeFilter ? { type: typeFilter as ProposalType } : {}),
@@ -86,7 +86,7 @@ export default async function ProposePage({
             </Button>
             <Button asChild>
               <Link href="/propose/new">
-                <Plus className="size-4" /> New proposal
+                <Plus className="size-4" /> Add Events
               </Link>
             </Button>
           </div>
@@ -115,7 +115,7 @@ export default async function ProposePage({
               action={
                 <Button asChild>
                   <Link href="/propose/new">
-                    <Plus className="size-4" /> Create first proposal
+                    <Plus className="size-4" /> Add Events
                   </Link>
                 </Button>
               }

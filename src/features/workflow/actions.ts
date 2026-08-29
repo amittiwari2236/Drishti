@@ -17,7 +17,7 @@ function utcDay(d = new Date()): Date {
  */
 export async function recordLoginTime(): Promise<void> {
   const user = await requireUser();
-  if (user.role !== "STUDENT") return;
+  if (user.role !== "INTERN") return;
   if (!user.companyId) return;
 
   const today = utcDay();
@@ -65,7 +65,7 @@ export async function recordLoginTime(): Promise<void> {
  */
 export async function acknowledgeTask(taskId: string): Promise<{ status: "ON_TIME" | "LATE" }> {
   const user = await requireUser();
-  if (user.role !== "STUDENT") {
+  if (user.role !== "INTERN") {
     throw new Error("Only students can acknowledge tasks.");
   }
 
@@ -128,7 +128,7 @@ export async function acknowledgeTask(taskId: string): Promise<{ status: "ON_TIM
  */
 export async function endWorkDay(): Promise<{ workingMinutes: number }> {
   const user = await requireUser();
-  if (user.role !== "STUDENT") {
+  if (user.role !== "INTERN") {
     throw new Error("Only students can end the work day.");
   }
 

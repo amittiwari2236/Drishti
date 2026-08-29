@@ -12,14 +12,14 @@ export default async function EditProjectPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "MENTOR");
+  const user = await requireRole("MANAGER", "MANAGER", "EXECUTIVE");
   const { id } = await params;
 
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) notFound();
   assertCompanyAccess(user, project.companyId);
 
-  if (user.role === "MENTOR") {
+  if (user.role === "EXECUTIVE") {
     const isMentor = await prisma.projectMentor.findUnique({
       where: { projectId_userId: { projectId: id, userId: user.id } },
     });

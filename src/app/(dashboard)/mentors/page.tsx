@@ -25,13 +25,13 @@ export default async function MentorsPage({
   const scope = await companyFilter(user);
   const activeCompanyId = await companyScope(user);
   const { created, password } = await searchParams;
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isSuperAdmin = user.role === "MANAGER";
 
   const [staff, companies] = await Promise.all([
     prisma.user.findMany({
       where: {
         ...scope,
-        role: { in: ["MENTOR", "COORDINATOR", "COMPANY_ADMIN"] },
+        role: { in: ["EXECUTIVE", "SENIOR", "MANAGER"] },
         deletedAt: null, // Don't show soft-deleted users
       },
       include: {

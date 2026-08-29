@@ -24,7 +24,7 @@ export default async function CalendarPage() {
       where: {
         ...scope,
         deletedAt: null,
-        ...(user.role === "STUDENT"
+        ...(user.role === "INTERN"
           ? { OR: [{ createdById: user.id }, { status: { in: ["APPROVED", "CONVERTED"] } }] }
           : {}),
       },
@@ -100,7 +100,7 @@ export default async function CalendarPage() {
     return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
   });
 
-  const canCreate = user.role !== "STUDENT";
+  const canCreate = user.role !== "INTERN";
 
   return (
     <div className="space-y-6">

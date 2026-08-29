@@ -5,7 +5,7 @@ import { requireRole, ACTIVE_COMPANY_COOKIE } from "@/lib/access";
 
 /** Super-admin-only: switch the active company scope. */
 export async function setActiveCompany(companyId: string | null) {
-  await requireRole("SUPER_ADMIN");
+  await requireRole("MANAGER");
   const store = await cookies();
   if (companyId) {
     store.set(ACTIVE_COMPANY_COOKIE, companyId, {

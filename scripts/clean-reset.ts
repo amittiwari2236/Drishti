@@ -61,7 +61,7 @@ async function cleanResetDatabase() {
       name: "System Administrator",
       email: "admin@example.com",
       emailVerified: true,
-      role: "SUPER_ADMIN",
+      role: "MANAGER",
       designation: "Head of Operations",
       phone: "+1 (555) 010-0000",
       accounts: {

@@ -89,16 +89,15 @@ export default async function ProjectDetailPage({
 
   // Students may only open projects they belong to.
   if (
-    user.role === "STUDENT" &&
+    user.role === "INTERN" &&
     !project.students.some((s) => s.userId === user.id)
   ) {
     notFound();
   }
 
   const canManage =
-    user.role === "SUPER_ADMIN" ||
-    user.role === "COMPANY_ADMIN" ||
-    (user.role === "MENTOR" &&
+    user.role === "MANAGER" ||
+    (user.role === "EXECUTIVE" &&
       project.mentors.some((m) => m.userId === user.id));
 
   // People available to assign.
@@ -107,7 +106,7 @@ export default async function ProjectDetailPage({
         prisma.user.findMany({
           where: {
             companyId: project.companyId,
-            role: { in: ["MENTOR", "COORDINATOR", "COMPANY_ADMIN"] },
+            role: { in: ["EXECUTIVE", "SENIOR", "MANAGER"] },
             isActive: true,
             id: { notIn: project.mentors.map((m) => m.userId) },
           },
@@ -116,7 +115,7 @@ export default async function ProjectDetailPage({
         prisma.user.findMany({
           where: {
             companyId: project.companyId,
-            role: "STUDENT",
+            role: "INTERN",
             isActive: true,
             id: { notIn: project.students.map((s) => s.userId) },
           },
@@ -145,7 +144,7 @@ export default async function ProjectDetailPage({
                   <Pencil className="size-4" /> Edit
                 </Link>
               </Button>
-              {user.role !== "MENTOR" && (
+              {user.role !== "EXECUTIVE" && (
                 <DeleteProjectButton
                   projectId={project.id}
                   projectName={project.name}

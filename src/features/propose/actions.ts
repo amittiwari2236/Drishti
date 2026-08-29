@@ -89,7 +89,7 @@ async function resolveTeacherOrMentor(
         name: trimmed,
         email,
         password: "Password@123",
-        role: "MENTOR",
+        role: "EXECUTIVE",
         companyId: companyId || null,
         designation: "Lead Event Mentor & Review Authority",
       });
@@ -142,7 +142,7 @@ async function resolveCompanyIdFromInput(
       return existing.id;
     }
 
-    if (user.role === "SUPER_ADMIN") {
+    if (user.role === "MANAGER") {
       const baseSlug =
         trimmed
           .toLowerCase()
@@ -175,7 +175,7 @@ export async function createProposal(formData: FormData) {
   const resolvedTeacherId = await resolveTeacherOrMentor(data.teacherName, data.teacherId, companyId);
 
   const initialStatus = data.submitForReview ? "SUBMITTED" : "DRAFT";
-  const assignedReviewerId = resolvedTeacherId || (user.role === "MENTOR" ? user.id : null);
+  const assignedReviewerId = resolvedTeacherId || (user.role === "EXECUTIVE" ? user.id : null);
 
   const proposal = await prisma.proposal.create({
     data: {
@@ -202,7 +202,7 @@ export async function createProposal(formData: FormData) {
     });
   }
 
-  if (data.submitForReview && user.role !== "SUPER_ADMIN") {
+  if (data.submitForReview && user.role !== "MANAGER") {
     import("@/lib/realtime").then(({ broadcastTaskEvent }) => {
       broadcastTaskEvent({
         type: "PROPOSAL_APPROVAL_REQUESTED",
@@ -240,10 +240,10 @@ export async function updateProposal(id: string, formData: FormData) {
   await assertCompanyAccess(user, current.companyId);
 
   // If student, can only edit their own proposals in DRAFT or REWORK
-  if (user.role === "STUDENT" && current.createdById !== user.id) {
+  if (user.role === "INTERN" && current.createdById !== user.id) {
     throw new Error("You can only edit your own proposals.");
   }
-  if (user.role === "STUDENT" && current.status !== "DRAFT" && current.status !== "REWORK") {
+  if (user.role === "INTERN" && current.status !== "DRAFT" && current.status !== "REWORK") {
     throw new Error("Cannot edit proposal while it is submitted or approved.");
   }
 
@@ -266,7 +266,7 @@ export async function updateProposal(id: string, formData: FormData) {
       : current.status;
 
   const assignedReviewerId =
-    resolvedTeacherId || current.reviewerId || (user.role === "MENTOR" ? user.id : null);
+    resolvedTeacherId || current.reviewerId || (user.role === "EXECUTIVE" ? user.id : null);
 
   const updated = await prisma.proposal.update({
     where: { id },
@@ -292,7 +292,7 @@ export async function updateProposal(id: string, formData: FormData) {
     });
   }
 
-  if (data.submitForReview && user.role !== "SUPER_ADMIN") {
+  if (data.submitForReview && user.role !== "MANAGER") {
     import("@/lib/realtime").then(({ broadcastTaskEvent }) => {
       broadcastTaskEvent({
         type: "PROPOSAL_APPROVAL_REQUESTED",
@@ -359,7 +359,7 @@ export async function submitProposalForReview(id: string) {
   }
 
   const assignedReviewerId =
-    current.teacherId || current.reviewerId || (user.role === "MENTOR" ? user.id : null);
+    current.teacherId || current.reviewerId || (user.role === "EXECUTIVE" ? user.id : null);
 
   await prisma.proposal.update({
     where: { id },
@@ -407,9 +407,9 @@ export async function reviewProposal(id: string, values: ProposalReviewValues) {
   const isAssignedMentor =
     (current.teacherId && current.teacherId === user.id) ||
     (current.reviewerId && current.reviewerId === user.id) ||
-    (current.createdById === user.id && user.role === "MENTOR");
+    (current.createdById === user.id && user.role === "EXECUTIVE");
 
-  const isAdmin = user.role === "SUPER_ADMIN" || user.role === "COMPANY_ADMIN" || user.role === "COORDINATOR";
+  const isAdmin = user.role === "MANAGER" || user.role === "SENIOR";
 
   if (!isAdmin && !isAssignedMentor) {
     throw new Error("Only the assigned mentor or administrator is authorized to review and approve this proposal.");

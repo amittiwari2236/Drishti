@@ -1,2 +1,2 @@
 import { can } from "../src/lib/permissions";
-console.log("Can student read attendance?", can("STUDENT", "attendance:read"));
+console.log("Can student read attendance?", can("INTERN", "attendance:read"));

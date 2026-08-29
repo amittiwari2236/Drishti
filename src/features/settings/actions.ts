@@ -177,7 +177,7 @@ export async function updateRolePermission(
   allowed: boolean
 ) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN" && !can(user, "permissions:manage")) {
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
     throw new Error("Only Super Administrators can manage role permissions.");
   }
 
@@ -230,7 +230,7 @@ export async function bulkUpdateRolePermissions(
   permissions: Record<string, boolean>
 ) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN" && !can(user, "permissions:manage")) {
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
     throw new Error("Only Super Administrators can manage role permissions.");
   }
 
@@ -271,7 +271,7 @@ export async function bulkUpdateRolePermissions(
 
 export async function resetRolePermissions(role: Role) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN" && !can(user, "permissions:manage")) {
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
     throw new Error("Only Super Administrators can reset role permissions.");
   }
 
@@ -317,7 +317,7 @@ export async function resetRolePermissions(role: Role) {
 
 export async function grantAllRolePermissions(role: Role) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN" && !can(user, "permissions:manage")) {
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
     throw new Error("Only Super Administrators can grant permissions.");
   }
 
@@ -362,7 +362,7 @@ export async function updateUserPermissionOverride(
   allowed: boolean | null
 ) {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN" && !can(user, "permissions:manage")) {
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
     throw new Error("Only Super Administrators can assign user-level permission overrides.");
   }
 
@@ -413,7 +413,7 @@ export async function updateUserPermissionOverride(
  */
 export async function resetAllRolesPermissions() {
   const user = await requireUser();
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.role !== "MANAGER") {
     throw new Error("Only Super Administrators can perform a full permission reset.");
   }
 
@@ -437,7 +437,7 @@ export async function resetAllRolesPermissions() {
   // 3. Re-seed every role with explicit true/false rows from default matrix
   const roles = Object.keys(DEFAULT_ROLE_PERMISSIONS) as (keyof typeof DEFAULT_ROLE_PERMISSIONS)[];
   for (const role of roles) {
-    if (role === "SUPER_ADMIN") continue; // Super Admin always has all permissions by logic
+    if (role === "MANAGER") continue; // Super Admin always has all permissions by logic
     const defaults = DEFAULT_ROLE_PERMISSIONS[role] ?? [];
     for (const def of PERMISSION_DEFINITIONS) {
       await prisma.rolePermission.create({

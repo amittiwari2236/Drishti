@@ -54,7 +54,7 @@ export async function createStudent(formData: FormData) {
     name: data.name,
     email: data.email,
     password,
-    role: "STUDENT",
+    role: "INTERN",
     companyId,
     phone: data.phone,
   });
@@ -147,7 +147,7 @@ export async function updateStudent(userId: string, formData: FormData) {
 export async function setStudentActive(userId: string, isActive: boolean) {
   const actor = await requirePermission("user:update");
   const target = await prisma.user.findUnique({ where: { id: userId } });
-  if (!target || target.role !== "STUDENT") throw new Error("Student not found");
+  if (!target || target.role !== "INTERN") throw new Error("Student not found");
   assertCompanyAccess(actor, target.companyId);
 
   await prisma.user.update({ where: { id: userId }, data: { isActive } });
@@ -166,10 +166,10 @@ export async function setStudentActive(userId: string, isActive: boolean) {
   revalidatePath("/students");
 }
 
-/** Soft-delete a user. SUPER_ADMIN only. */
+/** Soft-delete a user. MANAGER only. */
 export async function deleteUser(userId: string) {
   const actor = await requirePermission("user:delete");
-  if (actor.role !== "SUPER_ADMIN") {
+  if (actor.role !== "MANAGER") {
     throw new Error("Only Super Admin can delete users.");
   }
 

@@ -85,7 +85,7 @@ export async function updateCompany(id: string, formData: FormData) {
   if (!existing) throw new Error("Company not found");
   assertCompanyAccess(user, existing.id === user.companyId ? user.companyId : existing.id);
   // Non-super-admins may only update their own company.
-  if (user.role !== "SUPER_ADMIN" && user.companyId !== id) {
+  if (user.role !== "MANAGER" && user.companyId !== id) {
     throw new Error("Access denied.");
   }
 

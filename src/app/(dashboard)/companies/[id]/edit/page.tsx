@@ -12,9 +12,9 @@ export default async function EditCompanyPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN");
+  const user = await requireRole("MANAGER", "MANAGER");
   const { id } = await params;
-  if (user.role !== "SUPER_ADMIN" && user.companyId !== id) notFound();
+  if (user.role !== "MANAGER" && user.companyId !== id) notFound();
 
   const company = await prisma.company.findUnique({ where: { id } });
   if (!company) notFound();

@@ -7,7 +7,7 @@ export async function getCompanies() {
     include: {
       _count: {
         select: {
-          users: { where: { role: "STUDENT", deletedAt: null } },
+          users: { where: { role: "INTERN", deletedAt: null } },
           projects: { where: { deletedAt: null } },
           batches: { where: { deletedAt: null } },
         },
@@ -22,7 +22,7 @@ export async function getCompanyById(id: string) {
     include: {
       _count: {
         select: {
-          users: { where: { role: "STUDENT", deletedAt: null } },
+          users: { where: { role: "INTERN", deletedAt: null } },
           projects: { where: { deletedAt: null } },
           batches: { where: { deletedAt: null } },
           teams: { where: { deletedAt: null } },

@@ -23,10 +23,10 @@ export default async function BatchDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const user = await requireRole(
-    "SUPER_ADMIN",
-    "COMPANY_ADMIN",
-    "COORDINATOR",
-    "MENTOR"
+    "MANAGER",
+    "MANAGER",
+    "SENIOR",
+    "EXECUTIVE"
   );
   const { id } = await params;
 
@@ -55,7 +55,7 @@ export default async function BatchDetailPage({
     orderBy: { createdAt: "asc" },
   });
 
-  const canManage = user.role !== "MENTOR";
+  const canManage = user.role !== "EXECUTIVE";
 
   return (
     <>

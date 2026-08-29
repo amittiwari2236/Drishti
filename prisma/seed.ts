@@ -88,7 +88,7 @@ async function main() {
   const superAdmin = await createUser({
     name: "System Administrator",
     email: "admin@example.com",
-    role: "SUPER_ADMIN",
+    role: "MANAGER",
     designation: "Chief System Administrator & Super Admin",
     phone: "+1 (555) 010-9999",
     password: PASSWORD,
@@ -299,7 +299,7 @@ async function main() {
     const compAdmin = await createUser({
       name: comp.adminName,
       email: comp.contactEmail,
-      role: "COMPANY_ADMIN",
+      role: "MANAGER",
       companyId: company.id,
       designation: "VP of Engineering & Internship Director",
     });
@@ -308,7 +308,7 @@ async function main() {
     const coordinator = await createUser({
       name: comp.coordName,
       email: `coord.${comp.slug.split("-")[0]}@example.com`,
-      role: "COORDINATOR",
+      role: "SENIOR",
       companyId: company.id,
       designation: "Program Coordinator",
     });
@@ -319,7 +319,7 @@ async function main() {
       const mentor = await createUser({
         name: m.name,
         email: m.email,
-        role: "MENTOR",
+        role: "EXECUTIVE",
         companyId: company.id,
         designation: m.designation,
       });
@@ -350,7 +350,7 @@ async function main() {
       const student = await createUser({
         name: s.name,
         email: s.email,
-        role: "STUDENT",
+        role: "INTERN",
         companyId: company.id,
         designation: "Software Engineering Intern",
       });
@@ -739,8 +739,8 @@ async function main() {
 
   // ── 7. Seed Sample Proposals (2026 Plans Pipeline) ──
   const apexCompany = await prisma.company.findFirst({ where: { slug: "apex-innovations" } });
-  const mentorUser = await prisma.user.findFirst({ where: { role: "MENTOR", companyId: apexCompany?.id } });
-  const coordUser = await prisma.user.findFirst({ where: { role: "COORDINATOR", companyId: apexCompany?.id } });
+  const mentorUser = await prisma.user.findFirst({ where: { role: "EXECUTIVE", companyId: apexCompany?.id } });
+  const coordUser = await prisma.user.findFirst({ where: { role: "SENIOR", companyId: apexCompany?.id } });
 
   if (apexCompany && superAdmin) {
     await prisma.proposal.createMany({
@@ -829,7 +829,7 @@ async function main() {
   const teacherUser = await createUser({
     name: "Prof. Sarah Williams",
     email: "teacher@example.com",
-    role: "TEACHER",
+    role: "SENIOR",
     companyId: apexId,
     designation: "Lead Course Faculty & Teacher",
     phone: "+1 (555) 748-0001",
@@ -839,7 +839,7 @@ async function main() {
   const financeUser = await createUser({
     name: "David Fincher",
     email: "finance@example.com",
-    role: "FINANCE",
+    role: "EXECUTIVE",
     companyId: apexId,
     designation: "Head of Finance & Budgeting",
     phone: "+1 (555) 748-0002",
@@ -849,7 +849,7 @@ async function main() {
   const designerUser = await createUser({
     name: "Maya Lin",
     email: "designer@example.com",
-    role: "DESIGNER",
+    role: "EXECUTIVE",
     companyId: apexId,
     designation: "Principal UI/UX Designer",
     phone: "+1 (555) 748-0003",
@@ -859,7 +859,7 @@ async function main() {
   const instructorUser = await createUser({
     name: "James Wilson",
     email: "instructor@example.com",
-    role: "INSTRUCTOR",
+    role: "EXECUTIVE",
     companyId: apexId,
     designation: "Technical Workshop Instructor",
     phone: "+1 (555) 748-0004",
@@ -869,7 +869,7 @@ async function main() {
   const scheduleUser = await createUser({
     name: "Rachel Green",
     email: "schedule@example.com",
-    role: "SCHEDULE_MANAGER",
+    role: "SENIOR",
     companyId: apexId,
     designation: "Operations & Schedule Manager",
     phone: "+1 (555) 748-0005",
@@ -1031,7 +1031,7 @@ async function main() {
   for (const [roleName, perms] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
     const role = roleName as Role;
     for (const def of PERMISSION_DEFINITIONS) {
-      const allowed = role === "SUPER_ADMIN" ? true : perms.includes(def.code);
+      const allowed = role === "MANAGER" ? true : perms.includes(def.code);
       await prisma.rolePermission.upsert({
         where: {
           role_permissionCode: {

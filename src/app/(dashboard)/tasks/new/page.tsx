@@ -8,6 +8,8 @@ import { FolderKanban } from "lucide-react";
 import { TaskForm } from "@/features/tasks/components/task-form";
 import { getProjectOptions } from "@/features/tasks/queries";
 
+import { fetchPragyaAPI } from "@/lib/pragya-api";
+
 export const metadata: Metadata = { title: "New Task" };
 
 export default async function NewTaskPage() {
@@ -17,6 +19,25 @@ export default async function NewTaskPage() {
   }
 
   const projects = await getProjectOptions(user);
+  const token = (await cookies()).get('pragya_jwt')?.value;
+
+  let pragyaDepartments = [];
+  try {
+    if (token === "DUMMY_TOKEN_FOR_DEMO") {
+      pragyaDepartments = [
+        { id: 1, name: 'Technology', code: 'TECH', roles: [{id: 1, name: 'Developer', hierarchy_level: 3}, {id: 2, name: 'Tech Lead', hierarchy_level: 2}] },
+        { id: 2, name: 'Finance', code: 'FIN', roles: [] },
+        { id: 5, name: 'Teaching', code: 'TEACHING', roles: [{id: 3, name: 'Instructor', hierarchy_level: 3}] }
+      ];
+    } else {
+      const res = await fetchPragyaAPI('departments');
+      if (res.status && Array.isArray(res.data)) {
+        pragyaDepartments = res.data;
+      }
+    }
+  } catch (error) {
+    pragyaDepartments = [];
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -31,7 +52,11 @@ export default async function NewTaskPage() {
           description="Create a project before adding tasks to it."
         />
       ) : (
-        <TaskForm projects={projects} />
+        <TaskForm 
+          projects={projects} 
+          pragyaDepartments={pragyaDepartments}
+          currentUser={{ id: user.id, role: user.role, designation: user.designation }}
+        />
       )}
     </div>
   );

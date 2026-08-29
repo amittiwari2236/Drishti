@@ -40,7 +40,7 @@ export async function generateInsights(): Promise<InsightsResult> {
     activeStudentIds,
     recentReporterRows,
   ] = await Promise.all([
-    prisma.user.count({ where: { role: "STUDENT", ...scope } }),
+    prisma.user.count({ where: { role: "INTERN", ...scope } }),
     prisma.task.count({
       where: {
         ...scope,
@@ -67,7 +67,7 @@ export async function generateInsights(): Promise<InsightsResult> {
       },
     }),
     prisma.user.findMany({
-      where: { role: "STUDENT", isActive: true, ...scope },
+      where: { role: "INTERN", isActive: true, ...scope },
       select: { id: true },
     }),
     prisma.dailyLog.findMany({

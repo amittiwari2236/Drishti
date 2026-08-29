@@ -17,7 +17,7 @@ export async function Topbar({ user }: { user: SessionUser }) {
   });
 
   let switcher = null;
-  if (user.role === "SUPER_ADMIN") {
+  if (user.role === "MANAGER") {
     const companies = await prisma.company.findMany({
       where: { status: { not: "ARCHIVED" } },
       select: { id: true, name: true },

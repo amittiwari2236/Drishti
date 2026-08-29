@@ -34,10 +34,10 @@ export default async function StudentDetailPage({
   searchParams: Promise<{ created?: string; password?: string }>;
 }) {
   const user = await requireRole(
-    "SUPER_ADMIN",
-    "COMPANY_ADMIN",
-    "COORDINATOR",
-    "MENTOR"
+    "MANAGER",
+    "MANAGER",
+    "SENIOR",
+    "EXECUTIVE"
   );
   const { id } = await params;
   const { created, password } = await searchParams;
@@ -51,7 +51,7 @@ export default async function StudentDetailPage({
       },
     },
   });
-  if (!student || student.role !== "STUDENT" || !student.studentProfile) {
+  if (!student || student.role !== "INTERN" || !student.studentProfile) {
     notFound();
   }
   assertCompanyAccess(user, student.companyId);
@@ -61,7 +61,7 @@ export default async function StudentDetailPage({
     ? await computeStudentScore(student.id, student.companyId)
     : null;
 
-  const canManage = user.role !== "MENTOR";
+  const canManage = user.role !== "EXECUTIVE";
 
   const SCORE_ROWS = score
     ? ([

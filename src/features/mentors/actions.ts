@@ -18,8 +18,8 @@ export async function createStaffUser(values: MentorValues) {
   const data = mentorSchema.parse(values);
 
   // Only admins may create company admins.
-  if (data.role === "COMPANY_ADMIN") {
-    await requireRole("SUPER_ADMIN", "COMPANY_ADMIN");
+  if (data.role === "MANAGER") {
+    await requireRole("MANAGER", "MANAGER");
   }
 
   const companyId = await resolveCompanyForWrite(user, data.companyId);
@@ -52,7 +52,7 @@ export async function createStaffUser(values: MentorValues) {
 export async function setStaffActive(userId: string, isActive: boolean) {
   const actor = await requirePermission("user:update");
   const target = await prisma.user.findUnique({ where: { id: userId } });
-  if (!target || target.role === "STUDENT" || target.role === "SUPER_ADMIN") {
+  if (!target || target.role === "INTERN" || target.role === "MANAGER") {
     throw new Error("User not found");
   }
   assertCompanyAccess(actor, target.companyId);
@@ -71,16 +71,16 @@ export async function setStaffActive(userId: string, isActive: boolean) {
   revalidatePath("/mentors");
 }
 
-/** Soft-delete a staff user (mentor/coordinator/company admin). SUPER_ADMIN only. */
+/** Soft-delete a staff user (mentor/coordinator/company admin). MANAGER only. */
 export async function deleteStaffUser(userId: string) {
   const actor = await requirePermission("user:delete");
-  if (actor.role !== "SUPER_ADMIN") {
+  if (actor.role !== "MANAGER") {
     throw new Error("Only Super Admin can delete users.");
   }
 
   const target = await prisma.user.findUnique({ where: { id: userId } });
   if (!target) throw new Error("User not found.");
-  if (target.role === "STUDENT" || target.role === "SUPER_ADMIN") {
+  if (target.role === "INTERN" || target.role === "MANAGER") {
     throw new Error("Cannot delete this user type here.");
   }
 

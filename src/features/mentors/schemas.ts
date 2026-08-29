@@ -10,7 +10,7 @@ export const mentorSchema = z.object({
     .or(z.literal("")),
   phone: z.string().max(20).optional().or(z.literal("")),
   designation: z.string().max(120).optional().or(z.literal("")),
-  role: z.enum(["MENTOR", "COORDINATOR", "COMPANY_ADMIN"]),
+  role: z.enum(["EXECUTIVE", "SENIOR", "MANAGER"]),
   companyId: z.string().optional(),
 });
 

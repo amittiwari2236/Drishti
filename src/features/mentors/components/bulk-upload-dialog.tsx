@@ -19,8 +19,8 @@ import type { Role } from "@prisma/client";
 // ─── CSV template content ──────────────────────────────────────
 
 const CSV_TEMPLATE = `name,email,password,phone,designation,role
-Alex Johnson,alex.j@company.com,Welcome@123,9876543210,Senior Engineer,MENTOR
-Sarah Lee,sarah.l@company.com,,9123456780,HR Manager,COORDINATOR
+Alex Johnson,alex.j@company.com,Welcome@123,9876543210,Senior Engineer,EXECUTIVE
+Sarah Lee,sarah.l@company.com,,9123456780,HR Manager,SENIOR
 `;
 
 function downloadTemplate() {
@@ -208,7 +208,7 @@ export function BulkUploadDialog({
             <p className="font-medium text-foreground mb-1">CSV columns:</p>
             <code className="block leading-5">
               name, email, password (optional), phone (optional),
-              designation (optional), role (MENTOR, COORDINATOR, COMPANY_ADMIN - optional)
+              designation (optional), role (EXECUTIVE, SENIOR, MANAGER - optional)
             </code>
           </div>
 

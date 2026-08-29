@@ -6,7 +6,7 @@ import { CompanyForm } from "@/features/companies/components/company-form";
 export const metadata: Metadata = { title: "New Company" };
 
 export default async function NewCompanyPage() {
-  await requireRole("SUPER_ADMIN");
+  await requireRole("MANAGER");
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">

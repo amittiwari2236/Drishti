@@ -25,7 +25,7 @@ export default async function ProfilePage() {
   });
   if (!user) return null;
 
-  const isStudent = user.role === "STUDENT";
+  const isStudent = user.role === "INTERN";
   const score =
     isStudent && user.companyId
       ? await computeStudentScore(user.id, user.companyId)

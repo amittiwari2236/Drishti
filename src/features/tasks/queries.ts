@@ -17,7 +17,7 @@ export async function getProjectOptions(
     where: {
       ...scope,
       deletedAt: null,
-      ...(user.role === "STUDENT"
+      ...(user.role === "INTERN"
         ? { students: { some: { userId: user.id } } }
         : {}),
     },
@@ -25,7 +25,7 @@ export async function getProjectOptions(
       id: true,
       name: true,
       students: {
-        select: { user: { select: { id: true, name: true } } },
+        select: { user: { select: { id: true, name: true, designation: true } } },
       },
       milestones: {
         where: { deletedAt: null },
@@ -44,7 +44,7 @@ export async function getProjectOptions(
   return projects.map((p) => ({
     id: p.id,
     name: p.name,
-    students: p.students.map((s) => ({ id: s.user.id, name: s.user.name })),
+    students: p.students.map((s) => ({ id: s.user.id, name: s.user.name, designation: s.user.designation })),
     milestones: p.milestones,
     tasks: p.tasks,
   }));

@@ -21,16 +21,10 @@ import type {
 } from "@prisma/client";
 
 export const ROLE_LABELS: Record<Role, string> = {
-  SUPER_ADMIN: "Super Admin",
-  TEACHER: "Teacher",
-  FINANCE: "Finance",
-  DESIGNER: "Designer",
-  INSTRUCTOR: "Instructor",
-  SCHEDULE_MANAGER: "Schedule Manager",
-  COMPANY_ADMIN: "Company Admin",
-  COORDINATOR: "Coordinator",
-  MENTOR: "Mentor",
-  STUDENT: "Student",
+  MANAGER: "Head / Manager",
+  SENIOR: "Lead / Senior",
+  EXECUTIVE: "Staff / Executive",
+  INTERN: "Sub-role / Intern",
 };
 
 export const COMPANY_STATUS_LABELS: Record<CompanyStatus, string> = {

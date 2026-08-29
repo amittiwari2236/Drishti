@@ -43,10 +43,9 @@ export default async function ReviewsPage() {
   const canReview = can(user, "review:create");
   const canReviewProposal =
     can(user, "proposal:review") ||
-    user.role === "SUPER_ADMIN" ||
-    user.role === "COMPANY_ADMIN" ||
-    user.role === "COORDINATOR" ||
-    user.role === "MENTOR";
+    user.role === "MANAGER" ||
+    user.role === "SENIOR" ||
+    user.role === "EXECUTIVE";
 
   const [pendingProposals, pendingTasks, pendingLogs, givenReviews, receivedReviews] =
     await Promise.all([
@@ -56,7 +55,7 @@ export default async function ReviewsPage() {
               ...scope,
               deletedAt: null,
               status: { in: ["SUBMITTED", "UNDER_REVIEW"] },
-              ...(user.role === "MENTOR"
+              ...(user.role === "EXECUTIVE"
                 ? {
                     OR: [
                       { teacherId: user.id },

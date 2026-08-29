@@ -35,7 +35,7 @@ export default async function CompanyDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireRole("SUPER_ADMIN", "COMPANY_ADMIN");
+  await requireRole("MANAGER", "MANAGER");
   const { id } = await params;
   const company = await getCompanyById(id);
   if (!company) notFound();

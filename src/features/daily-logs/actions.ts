@@ -100,7 +100,7 @@ export async function createDailyLog(values: DailyLogValues) {
   const staffUsers = await prisma.user.findMany({
     where: {
       companyId: user.companyId,
-      role: { in: ["COMPANY_ADMIN", "COORDINATOR"] },
+      role: { in: ["MANAGER", "SENIOR"] },
       isActive: true,
       deletedAt: null,
     },
@@ -170,7 +170,7 @@ export async function deleteDailyLog(id: string) {
   const existing = await prisma.dailyLog.findUnique({ where: { id } });
   if (!existing) throw new Error("Daily log not found");
   assertCompanyAccess(user, existing.companyId);
-  if (existing.studentId !== user.id && user.role === "STUDENT") {
+  if (existing.studentId !== user.id && user.role === "INTERN") {
     throw new Error("You can only delete your own reports.");
   }
 

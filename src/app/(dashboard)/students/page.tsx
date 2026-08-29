@@ -23,8 +23,8 @@ export default async function StudentsPage() {
   const scope = await companyFilter(user);
   const activeCompanyId = await companyScope(user);
 
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
-  const canCreate = user.role !== "MENTOR";
+  const isSuperAdmin = user.role === "MANAGER";
+  const canCreate = user.role !== "EXECUTIVE";
 
   const [profiles, companies] = await Promise.all([
     prisma.studentProfile.findMany({

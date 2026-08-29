@@ -12,14 +12,14 @@ export default async function EditStudentPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "COORDINATOR");
+  const user = await requireRole("MANAGER", "MANAGER", "SENIOR");
   const { id } = await params;
 
   const student = await prisma.user.findUnique({
     where: { id },
     include: { studentProfile: true },
   });
-  if (!student || student.role !== "STUDENT" || !student.studentProfile) {
+  if (!student || student.role !== "INTERN" || !student.studentProfile) {
     notFound();
   }
   assertCompanyAccess(user, student.companyId);

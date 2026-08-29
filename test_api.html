@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester & Docs - Pragya Yoga</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: #1f2937;
+            --bg-hover: #374151;
+            --bg-input: #0f172a;
+            --border-color: #374151;
+            --border-focus: #6366f1;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-primary: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #a855f7;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        header {
+            background: linear-gradient(180deg, #161f30 0%, #111827 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .auth-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(8px);
+        }
+
+        .token-badge {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-dot.active {
+            background: var(--accent-emerald);
+            box-shadow: 0 0 8px var(--accent-emerald);
+        }
+
+        .token-preview {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.18s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-cyan {
+            background: rgba(6, 182, 212, 0.18);
+            border-color: rgba(6, 182, 212, 0.4);
+            color: #38bdf8;
+        }
+        .btn-cyan:hover {
+            background: rgba(6, 182, 212, 0.3);
+            color: #7dd3fc;
+            border-color: #06b6d4;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: #4b5563;
+        }
+
+        .btn-danger {
+            background: rgba(244, 63, 94, 0.15);
+            border-color: rgba(244, 63, 94, 0.3);
+            color: #fb7185;
+        }
+        .btn-danger:hover {
+            background: rgba(244, 63, 94, 0.25);
+            color: #fda4af;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        /* Main Container */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 65px);
+        }
+
+        /* Left Sidebar: Presets */
+        .sidebar {
+            width: 310px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px 8px 32px;
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+        }
+
+        .presets-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 10px;
+        }
+
+        .preset-group-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 8px 8px 4px 8px;
+            margin-top: 6px;
+        }
+
+        .preset-item {
+            padding: 7px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            transition: all 0.12s ease;
+            user-select: none;
+        }
+
+        .preset-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .preset-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .preset-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preset-badge {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .badge-post { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .badge-get { background: rgba(6, 182, 212, 0.15); color: #38bdf8; }
+        .badge-teacher { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .badge-auth { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+        /* Hierarchy Doc Card in Sidebar */
+        .hierarchy-guide-card {
+            background: linear-gradient(145deg, #131d31 0%, #0e1626 100%);
+            border: 1px solid #2a3b5c;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin: 12px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .hierarchy-guide-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #93c5fd;
+            margin-bottom: 8px;
+        }
+
+        .hierarchy-level-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 6px;
+            font-size: 11px;
+            border-radius: 4px;
+            margin-bottom: 3px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .lvl-num {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .lvl-1 { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .lvl-2 { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .lvl-3 { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+        .lvl-4 { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        .lvl-title {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Center / Right Grid */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        .pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .pane:last-child {
+            border-right: none;
+        }
+
+        .pane-header {
+            padding: 12px 18px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .pane-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pane-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* URL & Method Bar */
+        .request-url-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .method-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--accent-emerald);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 13px;
+            padding: 10px 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .url-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .url-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .url-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .api-quick-toggle {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .quick-chip {
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .quick-chip:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .quick-chip.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--accent-primary);
+            color: #a5b4fc;
+        }
+
+        /* Documentation / Notice Banner */
+        .info-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid #334155;
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .info-banner-title {
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hierarchy-pills-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .h-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        .tab-btn.tab-cyan.active {
+            color: #38bdf8;
+            border-bottom-color: #38bdf8;
+        }
+
+        /* Editor */
+        .editor-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 220px;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 220px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: #e2e8f0;
+            outline: none;
+            resize: vertical;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+
+        .editor-textarea:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .editor-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .editor-tools-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Options card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+        }
+
+        .card-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            color: var(--text-secondary);
+        }
+
+        .switch-label input[type="checkbox"] {
+            accent-color: var(--accent-primary);
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        /* Key-value headers table */
+        .kv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .kv-table th {
+            text-align: left;
+            padding: 6px 8px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .kv-table td {
+            padding: 4px 6px;
+        }
+
+        .kv-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            outline: none;
+        }
+        .kv-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* Response Pane */
+        .response-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+        }
+
+        .status-pill {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .status-2xx { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-sample { background: rgba(6, 182, 212, 0.2); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+        .status-4xx { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-5xx { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .status-pending { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+
+        .time-pill {
+            color: var(--text-secondary);
+        }
+
+        .size-pill {
+            color: var(--text-muted);
+        }
+
+        .response-view {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.6;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #d1d5db;
+            position: relative;
+        }
+
+        .empty-response-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .empty-response-state svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.4;
+        }
+
+        /* JSON Syntax Highlighting */
+        .json-key { color: #38bdf8; font-weight: 500; }
+        .json-string { color: #a7f3d0; }
+        .json-number { color: #fde047; }
+        .json-boolean { color: #f472b6; font-weight: 600; }
+        .json-null { color: #94a3b8; font-style: italic; }
+
+        /* History drawer or modal */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 8px 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .history-item:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-hover);
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 540px;
+            box-shadow: var(--shadow-subtle), var(--shadow-glow);
+            overflow: hidden;
+            animation: modalPop 0.15s ease-out;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-section">
+            <div class="brand-logo">PY</div>
+            <div>
+                <div class="brand-title">Pragya Yoga API Workbench & Docs</div>
+                <div class="brand-subtitle">Interactive Testing Suite with Instant Sample Responses</div>
+            </div>
+        </div>
+
+        <div class="auth-bar">
+            <div class="token-badge">
+                <span class="status-dot" id="authDot"></span>
+                <span id="authStatusText">No Token</span>
+            </div>
+            <div class="token-preview" id="tokenDisplay" title="Click to view full token">None</div>
+            <button class="btn btn-secondary btn-sm" id="manageTokenBtn" onclick="openTokenModal()">Manage Token</button>
+            <button class="btn btn-primary btn-sm" onclick="quickTeacherLogin()">Quick Teacher Login</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="app-container">
+        
+        <!-- Left Sidebar: Endpoint Presets & Reference -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="presetSearch" placeholder="Search actions..." oninput="filterPresets()">
+                </div>
+            </div>
+
+            <!-- Hierarchy Levels Developer Reference Box in Sidebar -->
+            <div class="hierarchy-guide-card">
+                <div class="hierarchy-guide-header">
+                    <span>Hierarchy Levels Guide</span>
+                    <span style="color:var(--text-muted); font-size:9px;">4 Levels</span>
+                </div>
+                <div class="hierarchy-level-row">
+                    <span class="lvl-num lvl-1">1</span>
+                    <span class="lvl-title">Head / Manager</span>
+                </div>
+                <div class="hierarchy-level-row">
+                    <span class="lvl-num lvl-2">2</span>
+                    <span class="lvl-title">Lead / Senior</span>
+                </div>
+                <div class="hierarchy-level-row">
+                    <span class="lvl-num lvl-3">3</span>
+                    <span class="lvl-title">Staff / Executive</span>
+                </div>
+                <div class="hierarchy-level-row">
+                    <span class="lvl-num lvl-4">4</span>
+                    <span class="lvl-title">Sub-role / Intern</span>
+                </div>
+            </div>
+
+            <div class="presets-list" id="presetsContainer">
+                <!-- Group: Teacher API -->
+                <div class="preset-group-title">Teacher API (api_teacher.php)</div>
+                
+                <div class="preset-item" onclick="loadPreset('teacher_login')">
+                    <span class="preset-name">Login <span class="preset-badge badge-auth">Auth</span></span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_get_profile')">
+                    <span class="preset-name">Get Profile</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_my_role')">
+                    <span class="preset-name">My Role & Dept</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_departments')">
+                    <span class="preset-name">Get Departments</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_department_roles')">
+                    <span class="preset-name">Department Roles</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_staff_members')">
+                    <span class="preset-name">All Staff Members <span class="preset-badge badge-auth">Hierarchy</span></span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_department_users')">
+                    <span class="preset-name">Department Users <span class="preset-badge badge-auth">Dept</span></span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_stats')">
+                    <span class="preset-name">Teacher Stats</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_schedule')">
+                    <span class="preset-name">Get Schedule</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_past_classes')">
+                    <span class="preset-name">Past Classes</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_session_bookings')">
+                    <span class="preset-name">Session Bookings</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_checkin')">
+                    <span class="preset-name">Checkin Member</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_complete_class')">
+                    <span class="preset-name">Complete Class</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_booking_requests')">
+                    <span class="preset-name">Booking Requests</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_empty_slots')">
+                    <span class="preset-name">Empty Slots</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_notifications')">
+                    <span class="preset-name">Notifications</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_app_version')">
+                    <span class="preset-name">App Version</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_check_token')">
+                    <span class="preset-name">Check Token</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_refresh_token')">
+                    <span class="preset-name">Refresh Token</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('teacher_reset_pwd')">
+                    <span class="preset-name">Reset Password</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+
+                <!-- Group: Main API -->
+                <div class="preset-group-title">Main / Student API (api.php)</div>
+                <div class="preset-item" onclick="loadPreset('main_app_version')">
+                    <span class="preset-name">App Version</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('main_login')">
+                    <span class="preset-name">Student Login</span>
+                    <span class="preset-badge badge-auth">Auth</span>
+                </div>
+                <div class="preset-item" onclick="loadPreset('main_get_profile')">
+                    <span class="preset-name">Student Profile</span>
+                    <span class="preset-badge badge-post">POST</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center & Right Workspace -->
+        <main class="workspace">
+            
+            <!-- Request Pane -->
+            <section class="pane">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        Request
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-cyan btn-sm" id="viewSampleBtn" onclick="renderCurrentSampleResponse()" title="Instant sample output without making network requests">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            View Sample Output
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="sendBtn" onclick="sendRequest()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            Send (Ctrl+Enter)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pane-body">
+                    <!-- URL Bar -->
+                    <div>
+                        <div class="request-url-bar">
+                            <select id="httpMethod" class="method-select">
+                                <option value="POST">POST</option>
+                                <option value="GET">GET</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="OPTIONS">OPTIONS</option>
+                            </select>
+                            <div class="url-input-wrapper">
+                                <input type="text" id="targetUrl" class="url-input" value="api_teacher.php" placeholder="api_teacher.php">
+                            </div>
+                        </div>
+                        <div class="api-quick-toggle">
+                            <span class="quick-chip active" onclick="setApiTarget('api_teacher.php')">api_teacher.php</span>
+                            <span class="quick-chip" onclick="setApiTarget('api.php')">api.php</span>
+                            <span class="quick-chip" onclick="setApiTarget('event_profit_api.php')">event_profit_api.php</span>
+                        </div>
+                    </div>
+
+                    <!-- Hierarchy Levels Note Banner for Developer -->
+                    <div class="info-banner" id="hierarchyDocBanner">
+                        <div class="info-banner-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <span>Department & Role Hierarchy Levels (4 Levels)</span>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 11px;">
+                            Department roles use numeric <code>hierarchy_level</code> values (1 to 4):
+                        </div>
+                        <div class="hierarchy-pills-row">
+                            <span class="h-pill lvl-1"><strong>1:</strong> Head / Manager</span>
+                            <span class="h-pill lvl-2"><strong>2:</strong> Lead / Senior</span>
+                            <span class="h-pill lvl-3"><strong>3:</strong> Staff / Executive</span>
+                            <span class="h-pill lvl-4"><strong>4:</strong> Sub-role / Intern</span>
+                        </div>
+                    </div>
+
+                    <!-- Token Injection Options -->
+                    <div class="card">
+                        <div class="card-row">
+                            <label class="switch-label">
+                                <input type="checkbox" id="autoInjectToken" checked>
+                                <span>Auto-inject stored <code>token</code> into JSON body</span>
+                            </label>
+                            <button class="btn btn-secondary btn-sm" onclick="insertTokenIntoBody()">Insert Token Now</button>
+                        </div>
+                    </div>
+
+                    <!-- Request Tabs -->
+                    <div>
+                        <div class="tab-bar">
+                            <button class="tab-btn active" onclick="switchReqTab('body')">JSON Body</button>
+                            <button class="tab-btn" onclick="switchReqTab('headers')">Headers (<span id="headerCount">1</span>)</button>
+                            <button class="tab-btn" onclick="switchReqTab('history')">History</button>
+                        </div>
+
+                        <!-- Tab: JSON Body -->
+                        <div id="tabContentBody" class="tab-content">
+                            <div class="editor-container">
+                                <textarea id="requestBody" class="editor-textarea" spellcheck="false" placeholder="Enter JSON payload here...">{
+  "action": "departments"
+}</textarea>
+                                <div class="editor-tools">
+                                    <span id="jsonValidationMsg" style="color: var(--accent-emerald);">JSON Valid</span>
+                                    <div class="editor-tools-right">
+                                        <button class="btn btn-secondary btn-sm" onclick="beautifyJson()">Format JSON</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="clearBody()">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Headers -->
+                        <div id="tabContentHeaders" class="tab-content" style="display: none;">
+                            <table class="kv-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40%;">Header Name</th>
+                                        <th>Header Value</th>
+                                        <th style="width: 30px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="headersTableBody">
+                                    <tr>
+                                        <td><input type="text" class="kv-input hdr-key" value="Content-Type"></td>
+                                        <td><input type="text" class="kv-input hdr-val" value="application/json"></td>
+                                        <td><button class="btn btn-danger btn-sm" onclick="removeHeaderRow(this)">✕</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-secondary btn-sm" onclick="addHeaderRow()">+ Add Header</button>
+                            </div>
+                        </div>
+
+                        <!-- Tab: History -->
+                        <div id="tabContentHistory" class="tab-content" style="display: none;">
+                            <div class="history-list" id="historyList">
+                                <div style="color: var(--text-muted); font-size: 12px; padding: 10px; text-align: center;">No previous requests yet.</div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                                <button class="btn btn-danger btn-sm" onclick="clearHistory()">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Response Pane -->
+            <section class="pane">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                        Response
+                    </div>
+                    <div class="response-status-bar" id="responseMeta" style="display: none;">
+                        <span class="status-pill status-2xx" id="statusBadge">200 OK</span>
+                        <span class="time-pill" id="timeBadge">0 ms</span>
+                        <span class="size-pill" id="sizeBadge">0 B</span>
+                    </div>
+                </div>
+
+                <div class="pane-body">
+                    <div class="tab-bar">
+                        <button class="tab-btn active" id="tabBtnFormatted" onclick="switchResTab('formatted')">Pretty JSON</button>
+                        <button class="tab-btn tab-cyan" id="tabBtnSampleDocs" onclick="switchResTab('sampleDocs')">★ Sample Response (Docs)</button>
+                        <button class="tab-btn" id="tabBtnRaw" onclick="switchResTab('raw')">Raw Response</button>
+                        <button class="tab-btn" id="tabBtnHeaders" onclick="switchResTab('resHeaders')">Headers</button>
+                        <button class="tab-btn" id="jwtTabBtn" onclick="switchResTab('jwtInfo')" style="display: none;">Decoded JWT</button>
+                    </div>
+
+                    <!-- Pretty JSON View (Live Server) -->
+                    <div id="resTabFormatted" class="response-view">
+                        <div class="empty-response-state" id="resEmptyState">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                            <div>Send a request or click <strong>"View Sample Output"</strong> above to see sample response data.</div>
+                        </div>
+                        <div id="formattedJsonContent" style="display: none;"></div>
+                    </div>
+
+                    <!-- Sample Response / Docs View -->
+                    <div id="resTabSampleDocs" class="response-view" style="display: none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+                            <span style="color:#38bdf8; font-weight:700; font-size:12px;">★ Sample Response Specification</span>
+                            <span id="sampleActionBadge" class="preset-badge badge-get">SAMPLE</span>
+                        </div>
+                        <div id="sampleJsonContent"></div>
+                    </div>
+
+                    <!-- Raw Response View -->
+                    <pre id="resTabRaw" class="response-view" style="display: none;"></pre>
+
+                    <!-- Response Headers View -->
+                    <pre id="resTabHeaders" class="response-view" style="display: none;"></pre>
+
+                    <!-- Decoded JWT View -->
+                    <div id="resTabJwt" class="response-view" style="display: none;"></div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div id="responseAutoActionMsg" style="font-size: 11px; color: var(--accent-emerald);"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-sm" onclick="copyResponse()">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                Copy Response
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="downloadResponse()">Download JSON</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Token Manager Modal -->
+    <div class="modal-overlay" id="tokenModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Authentication & JWT Token</div>
+                <button class="btn btn-secondary btn-sm" onclick="closeTokenModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Access Token (JWT)</label>
+                    <textarea id="modalTokenInput" class="editor-textarea" style="min-height: 100px;" placeholder="Paste JWT token here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Refresh Token</label>
+                    <input type="text" id="modalRefreshTokenInput" class="form-input" placeholder="Paste refresh token here...">
+                </div>
+                <div id="jwtDecodedCard" style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; font-family: var(--font-mono); font-size: 11px; max-height: 140px; overflow: auto; display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-sm" onclick="clearSavedToken()">Clear Stored Token</button>
+                <button class="btn btn-primary btn-sm" onclick="saveModalToken()">Save Token</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Login Modal -->
+    <div class="modal-overlay" id="quickLoginModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Teacher Quick Login</div>
+                <button class="btn btn-secondary btn-sm" onclick="closeQuickLoginModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="e.g. teacher@example.com" value="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="Password" value="">
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    This will send a POST request to <code>api_teacher.php</code> with <code>action: "login"</code> and automatically store the returned JWT token.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" onclick="closeQuickLoginModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" onclick="executeQuickLogin()">Log In & Store Token</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <script>
+        // Preset Configurations
+        const PRESETS = {
+            teacher_login: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'login',
+                    email: '',
+                    password: ''
+                }
+            },
+            teacher_get_profile: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'get-profile',
+                    token: '{{TOKEN}}'
+                }
+            },
+            teacher_my_role: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'my-role',
+                    token: '{{TOKEN}}'
+                }
+            },
+            teacher_departments: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'departments'
+                }
+            },
+            teacher_department_roles: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'department-roles',
+                    department_id: 1
+                }
+            },
+            teacher_staff_members: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'staff-members',
+                    token: '{{TOKEN}}',
+                    department_id: '',
+                    search: ''
+                }
+            },
+            teacher_department_users: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'department-users',
+                    token: '{{TOKEN}}',
+                    department_id: 1
+                }
+            },
+            teacher_stats: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'stats',
+                    token: '{{TOKEN}}'
+                }
+            },
+            teacher_schedule: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'schedule',
+                    token: '{{TOKEN}}',
+                    date: new Date().toISOString().split('T')[0]
+                }
+            },
+            teacher_past_classes: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'past-classes',
+                    token: '{{TOKEN}}',
+                    page: 1
+                }
+            },
+            teacher_session_bookings: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'session-bookings',
+                    token: '{{TOKEN}}',
+                    schedule_id: 1
+                }
+            },
+            teacher_checkin: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'checkin',
+                    token: '{{TOKEN}}',
+                    booking_id: 1,
+                    status: 'present'
+                }
+            },
+            teacher_complete_class: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'complete-class',
+                    token: '{{TOKEN}}',
+                    schedule_id: 1
+                }
+            },
+            teacher_booking_requests: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'booking-requests',
+                    token: '{{TOKEN}}'
+                }
+            },
+            teacher_empty_slots: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'empty-slots',
+                    token: '{{TOKEN}}',
+                    date: new Date().toISOString().split('T')[0]
+                }
+            },
+            teacher_notifications: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'notifications',
+                    token: '{{TOKEN}}'
+                }
+            },
+            teacher_app_version: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'app-version'
+                }
+            },
+            teacher_check_token: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'check-token',
+                    token: '{{TOKEN}}',
+                    refresh_token: '{{REFRESH_TOKEN}}'
+                }
+            },
+            teacher_refresh_token: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'refresh-token',
+                    refresh_token: '{{REFRESH_TOKEN}}'
+                }
+            },
+            teacher_reset_pwd: {
+                url: 'api_teacher.php',
+                method: 'POST',
+                body: {
+                    action: 'reset-password',
+                    email: 'teacher@example.com'
+                }
+            },
+            main_app_version: {
+                url: 'api.php',
+                method: 'POST',
+                body: {
+                    action: 'app-version'
+                }
+            },
+            main_login: {
+                url: 'api.php',
+                method: 'POST',
+                body: {
+                    action: 'login',
+                    email: '',
+                    password: ''
+                }
+            },
+            main_get_profile: {
+                url: 'api.php',
+                method: 'POST',
+                body: {
+                    action: 'get-profile',
+                    token: '{{TOKEN}}'
+                }
+            }
+        };
+
+        // Complete Sample Response Dictionary (Developers can view without any login/JWT)
+        const SAMPLE_RESPONSES = {
+            'app-version': {
+                'latest_version': '1.0.0',
+                'force_update': false
+            },
+
+            'login': {
+                'status': true,
+                'message': 'Login successful',
+                'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sample_teacher_jwt_token_...',
+                'refresh_token': 'sample_refresh_token_abc123xyz789',
+                'uid': '101',
+                'name': 'Jane Doe',
+                'fname': 'Jane',
+                'lname': 'Doe',
+                'email': 'teacher@pragya-yog.com',
+                'phone': '+852 9876 5432',
+                'profile': 'https://pragya-yog.com/uploads/blank.png',
+                'account_type': 'staff',
+                'teacher_post': 'Senior Yoga Master',
+                'notify_push': 1,
+                'department': 'Yoga & Instruction',
+                'department_id': 1,
+                'department_name': 'Yoga & Instruction',
+                'department_code': 'YOGA',
+                'role': 'Lead Instructor',
+                'role_id': 2,
+                'role_name': 'Lead Instructor',
+                'role_level': 2,
+                'is_sub_role': false,
+                'sub_role': null,
+                'main_role': 'Lead Instructor',
+                'parent_role_id': null,
+                'parent_role_name': null,
+                'reports_to_id': 10,
+                'reports_to_name': 'Master Acharya',
+                'role_details': {
+                    'department_id': 1,
+                    'department_name': 'Yoga & Instruction',
+                    'department_code': 'YOGA',
+                    'role_id': 2,
+                    'role_name': 'Lead Instructor',
+                    'role_level': 2,
+                    'is_sub_role': false,
+                    'main_role': 'Lead Instructor',
+                    'sub_role': null,
+                    'parent_role_id': null,
+                    'parent_role_name': null,
+                    'reports_to_id': 10,
+                    'reports_to_name': 'Master Acharya'
+                }
+            },
+
+            'get-profile': {
+                'status': true,
+                'data': {
+                    'id': '101',
+                    'name': 'Jane Doe',
+                    'fname': 'Jane',
+                    'lname': 'Doe',
+                    'email': 'teacher@pragya-yog.com',
+                    'phone': '+852 9876 5432',
+                    'profile': 'https://pragya-yog.com/uploads/blank.png',
+                    'account_type': 'staff',
+                    'teacher_post': 'Senior Yoga Master',
+                    'notify_push': 1,
+                    'department': 'Yoga & Instruction',
+                    'department_id': 1,
+                    'department_name': 'Yoga & Instruction',
+                    'department_code': 'YOGA',
+                    'role': 'Lead Instructor',
+                    'role_id': 2,
+                    'role_name': 'Lead Instructor',
+                    'role_level': 2,
+                    'is_sub_role': false,
+                    'sub_role': null,
+                    'main_role': 'Lead Instructor',
+                    'parent_role_id': null,
+                    'parent_role_name': null,
+                    'reports_to_id': 10,
+                    'reports_to_name': 'Master Acharya',
+                    'role_details': {
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'role_id': 2,
+                        'role_name': 'Lead Instructor',
+                        'role_level': 2,
+                        'is_sub_role': false,
+                        'main_role': 'Lead Instructor',
+                        'sub_role': null,
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'reports_to_id': 10,
+                        'reports_to_name': 'Master Acharya'
+                    }
+                }
+            },
+
+            'my-role': {
+                'status': true,
+                'data': {
+                    'id': '101',
+                    'name': 'Jane Doe',
+                    'fname': 'Jane',
+                    'lname': 'Doe',
+                    'email': 'teacher@pragya-yog.com',
+                    'phone': '+852 9876 5432',
+                    'profile': 'https://pragya-yog.com/uploads/blank.png',
+                    'teacher_post': 'Senior Yoga Master',
+                    'department': 'Yoga & Instruction',
+                    'department_id': 1,
+                    'department_name': 'Yoga & Instruction',
+                    'department_code': 'YOGA',
+                    'role': 'Lead Instructor',
+                    'role_id': 2,
+                    'role_name': 'Lead Instructor',
+                    'role_level': 2,
+                    'is_sub_role': false,
+                    'sub_role': null,
+                    'main_role': 'Lead Instructor',
+                    'parent_role_id': null,
+                    'parent_role_name': null,
+                    'reports_to_id': 10,
+                    'reports_to_name': 'Master Acharya',
+                    'manager': {
+                        'id': '10',
+                        'name': 'Master Acharya',
+                        'fname': 'Master',
+                        'lname': 'Acharya',
+                        'email': 'acharya@pragya-yog.com',
+                        'phone': '+852 9111 2222',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png'
+                    },
+                    'peers': [
+                        {
+                            'id': '102',
+                            'name': 'Rahul Sharma',
+                            'fname': 'Rahul',
+                            'lname': 'Sharma',
+                            'email': 'rahul@pragya-yog.com',
+                            'phone': '+852 9222 3333',
+                            'profile': 'https://pragya-yog.com/uploads/blank.png',
+                            'teacher_post': 'Hatha Yoga Teacher',
+                            'role': 'Hatha Yoga Teacher',
+                            'role_id': 3,
+                            'role_name': 'Assistant Teacher',
+                            'role_level': 3,
+                            'is_sub_role': true,
+                            'sub_role': 'Assistant Teacher',
+                            'main_role': 'Lead Instructor',
+                            'parent_role_id': 2,
+                            'parent_role_name': 'Lead Instructor'
+                        }
+                    ],
+                    'role_details': {
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'role_id': 2,
+                        'role_name': 'Lead Instructor',
+                        'role_level': 2,
+                        'is_sub_role': false,
+                        'main_role': 'Lead Instructor',
+                        'sub_role': null,
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'reports_to_id': 10,
+                        'reports_to_name': 'Master Acharya'
+                    }
+                }
+            },
+
+            'departments': {
+                'status': true,
+                'data': [
+                    {
+                        'id': 1,
+                        'name': 'Yoga & Instruction',
+                        'code': 'YOGA',
+                        'description': 'Core yoga masters, lead instructors, and teaching staff',
+                        'head_user_id': 10,
+                        'roles': [
+                            {
+                                'id': 1,
+                                'department_id': 1,
+                                'name': 'Head of Yoga',
+                                'role': 'Head of Yoga',
+                                'hierarchy_level': 1,
+                                'parent_role_id': null,
+                                'parent_role_name': null,
+                                'is_sub_role': false,
+                                'sub_role': null,
+                                'main_role': 'Head of Yoga',
+                                'description': 'Department Lead & Curriculum Master'
+                            },
+                            {
+                                'id': 2,
+                                'department_id': 1,
+                                'name': 'Lead Instructor',
+                                'role': 'Lead Instructor',
+                                'hierarchy_level': 2,
+                                'parent_role_id': null,
+                                'parent_role_name': null,
+                                'is_sub_role': false,
+                                'sub_role': null,
+                                'main_role': 'Lead Instructor',
+                                'description': 'Senior Instructor leading session tracks'
+                            },
+                            {
+                                'id': 3,
+                                'department_id': 1,
+                                'name': 'Assistant Teacher',
+                                'role': 'Assistant Teacher',
+                                'hierarchy_level': 3,
+                                'parent_role_id': 2,
+                                'parent_role_name': 'Lead Instructor',
+                                'is_sub_role': true,
+                                'sub_role': 'Assistant Teacher',
+                                'main_role': 'Lead Instructor',
+                                'description': 'Sub-role supporting class execution'
+                            }
+                        ]
+                    },
+                    {
+                        'id': 2,
+                        'name': 'Front Desk & Reception',
+                        'code': 'RECEP',
+                        'description': 'Customer service, check-ins, and desk operations',
+                        'head_user_id': 15,
+                        'roles': [
+                            {
+                                'id': 4,
+                                'department_id': 2,
+                                'name': 'Front Desk Manager',
+                                'role': 'Front Desk Manager',
+                                'hierarchy_level': 1,
+                                'parent_role_id': null,
+                                'parent_role_name': null,
+                                'is_sub_role': false,
+                                'sub_role': null,
+                                'main_role': 'Front Desk Manager',
+                                'description': 'Desk operations supervisor'
+                            }
+                        ]
+                    }
+                ]
+            },
+
+            'department-roles': {
+                'status': true,
+                'data': [
+                    {
+                        'id': 1,
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'name': 'Head of Yoga',
+                        'role': 'Head of Yoga',
+                        'hierarchy_level': 1,
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'is_sub_role': false,
+                        'sub_role': null,
+                        'main_role': 'Head of Yoga',
+                        'description': 'Department Lead & Curriculum Master'
+                    },
+                    {
+                        'id': 2,
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'name': 'Lead Instructor',
+                        'role': 'Lead Instructor',
+                        'hierarchy_level': 2,
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'is_sub_role': false,
+                        'sub_role': null,
+                        'main_role': 'Lead Instructor',
+                        'description': 'Senior Instructor leading session tracks'
+                    }
+                ]
+            },
+
+            'staff-members': {
+                'status': true,
+                'caller_hierarchy_level': 2,
+                'total': 2,
+                'data': [
+                    {
+                        'id': '101',
+                        'name': 'Jane Doe',
+                        'fname': 'Jane',
+                        'lname': 'Doe',
+                        'email': 'teacher@pragya-yog.com',
+                        'phone': '+852 9876 5432',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png',
+                        'teacher_post': 'Senior Yoga Master',
+                        'account_type': 'staff',
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'role_id': 2,
+                        'role_name': 'Lead Instructor',
+                        'hierarchy_level': 2,
+                        'role_level': 2,
+                        'is_sub_role': false,
+                        'sub_role': null,
+                        'main_role': 'Lead Instructor',
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'reports_to_id': 10,
+                        'reports_to_name': 'Master Acharya',
+                        'manager': {
+                            'id': '10',
+                            'name': 'Master Acharya',
+                            'email': 'acharya@pragya-yog.com',
+                            'phone': '+852 9111 2222',
+                            'profile': 'https://pragya-yog.com/uploads/blank.png'
+                        }
+                    },
+                    {
+                        'id': '102',
+                        'name': 'Rahul Sharma',
+                        'fname': 'Rahul',
+                        'lname': 'Sharma',
+                        'email': 'rahul@pragya-yog.com',
+                        'phone': '+852 9222 3333',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png',
+                        'teacher_post': 'Hatha Yoga Teacher',
+                        'account_type': 'staff',
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'role_id': 3,
+                        'role_name': 'Assistant Teacher',
+                        'hierarchy_level': 3,
+                        'role_level': 3,
+                        'is_sub_role': true,
+                        'sub_role': 'Assistant Teacher',
+                        'main_role': 'Lead Instructor',
+                        'parent_role_id': 2,
+                        'parent_role_name': 'Lead Instructor',
+                        'reports_to_id': 101,
+                        'reports_to_name': 'Jane Doe',
+                        'manager': {
+                            'id': '101',
+                            'name': 'Jane Doe',
+                            'email': 'teacher@pragya-yog.com',
+                            'phone': '+852 9876 5432',
+                            'profile': 'https://pragya-yog.com/uploads/blank.png'
+                        }
+                    }
+                ]
+            },
+
+            'department-users': {
+                'status': true,
+                'caller_hierarchy_level': 2,
+                'total': 1,
+                'data': [
+                    {
+                        'id': '101',
+                        'name': 'Jane Doe',
+                        'fname': 'Jane',
+                        'lname': 'Doe',
+                        'email': 'teacher@pragya-yog.com',
+                        'phone': '+852 9876 5432',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png',
+                        'teacher_post': 'Senior Yoga Master',
+                        'account_type': 'staff',
+                        'department_id': 1,
+                        'department_name': 'Yoga & Instruction',
+                        'department_code': 'YOGA',
+                        'role_id': 2,
+                        'role_name': 'Lead Instructor',
+                        'hierarchy_level': 2,
+                        'role_level': 2,
+                        'is_sub_role': false,
+                        'sub_role': null,
+                        'main_role': 'Lead Instructor',
+                        'parent_role_id': null,
+                        'parent_role_name': null,
+                        'reports_to_id': 10,
+                        'reports_to_name': 'Master Acharya'
+                    }
+                ]
+            },
+
+            'stats': {
+                'status': true,
+                'data': {
+                    'today_classes': 3,
+                    'month_classes': 42,
+                    'total_students': 128,
+                    'pending_requests': 2
+                }
+            },
+
+            'schedule': {
+                'status': true,
+                'data': [
+                    {
+                        'id': '101',
+                        'class_title': 'Morning Vinyasa Flow',
+                        'class_type': 'Vinyasa',
+                        'date': '2026-08-28',
+                        'start_time': '08:00am',
+                        'end_time': '09:00am',
+                        'time_range': '8:00am - 9:00am',
+                        'location': 'Studio A (Main Hall)',
+                        'booked_count': 14,
+                        'capacity': 20,
+                        'status': 'upcoming',
+                        'color': '#4CAF50'
+                    },
+                    {
+                        'id': '102',
+                        'class_title': 'Gentle Hatha & Pranayama',
+                        'class_type': 'Hatha',
+                        'date': '2026-08-28',
+                        'start_time': '11:00am',
+                        'end_time': '12:00pm',
+                        'time_range': '11:00am - 12:00pm',
+                        'location': 'Studio B',
+                        'booked_count': 8,
+                        'capacity': 15,
+                        'status': 'upcoming',
+                        'color': '#2196F3'
+                    }
+                ]
+            },
+
+            'past-classes': {
+                'status': true,
+                'data': [
+                    {
+                        'id': '99',
+                        'class_title': 'Evening Yin Yoga',
+                        'date': '2026-08-26',
+                        'start_time': '07:00pm',
+                        'end_time': '08:00pm',
+                        'time_range': '7:00pm - 8:00pm',
+                        'attended_count': 18,
+                        'status': 'completed'
+                    }
+                ],
+                'has_more': false
+            },
+
+            'session-bookings': {
+                'status': true,
+                'schedule_id': 101,
+                'data': [
+                    {
+                        'booking_id': '501',
+                        'user_id': '201',
+                        'name': 'Alice Wong',
+                        'email': 'alice@example.com',
+                        'phone': '+852 9000 1111',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png',
+                        'checkin_status': 'checked_in',
+                        'checked_in_at': '2026-08-28 07:55:00'
+                    },
+                    {
+                        'booking_id': '502',
+                        'user_id': '202',
+                        'name': 'David Lee',
+                        'email': 'david@example.com',
+                        'phone': '+852 9000 2222',
+                        'profile': 'https://pragya-yog.com/uploads/blank.png',
+                        'checkin_status': 'pending',
+                        'checked_in_at': null
+                    }
+                ]
+            },
+
+            'checkin': {
+                'status': true,
+                'message': 'Student check-in recorded successfully',
+                'booking_id': 501,
+                'checkin_status': 'present'
+            },
+
+            'complete-class': {
+                'status': true,
+                'message': 'Class completed successfully',
+                'schedule_id': 101
+            },
+
+            'notifications': {
+                'status': true,
+                'data': [
+                    {
+                        'id': '1',
+                        'title': 'New Class Booking',
+                        'message': 'Alice Wong booked for Morning Vinyasa Flow.',
+                        'created_at': '2026-08-27 10:30:00',
+                        'is_read': 0
+                    },
+                    {
+                        'id': '2',
+                        'title': 'Schedule Update',
+                        'message': 'Your Friday class has been moved to Studio A.',
+                        'created_at': '2026-08-26 15:45:00',
+                        'is_read': 1
+                    }
+                ]
+            },
+
+            'booking-requests': {
+                'status': true,
+                'data': [
+                    {
+                        'request_id': '1',
+                        'user_id': '205',
+                        'user_name': 'Bob Chan',
+                        'requested_date': '2026-08-29',
+                        'time_slot': '10:00am - 11:00am',
+                        'status': 'pending'
+                    }
+                ]
+            },
+
+            'empty-slots': {
+                'status': true,
+                'data': [
+                    {
+                        'date': '2026-08-28',
+                        'start_time': '02:00pm',
+                        'end_time': '03:00pm',
+                        'room': 'Studio B'
+                    }
+                ]
+            },
+
+            'check-token': {
+                'status': true,
+                'message': false
+            },
+
+            'refresh-token': {
+                'status': true,
+                'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.new_sample_jwt_access_token...',
+                'refresh_token': 'new_sample_refresh_token_67890'
+            },
+
+            'reset-password': {
+                'status': true,
+                'message': 'Reset password link sent to your email'
+            }
+        };
+
+        // State
+        let rawLastResponse = '';
+        let lastResponseObj = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTokenUI();
+            validateJsonInput();
+            loadHistoryUI();
+
+            document.getElementById('requestBody').addEventListener('input', validateJsonInput);
+
+            // Ctrl+Enter shortcut
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    sendRequest();
+                }
+            });
+        });
+
+        // Token Management
+        function getStoredToken() {
+            return localStorage.getItem('py_api_token') || '';
+        }
+        function getStoredRefreshToken() {
+            return localStorage.getItem('py_api_refresh_token') || '';
+        }
+
+        function setStoredToken(token, refreshToken = null) {
+            if (token) {
+                localStorage.setItem('py_api_token', token.trim());
+            }
+            if (refreshToken) {
+                localStorage.setItem('py_api_refresh_token', refreshToken.trim());
+            }
+            updateTokenUI();
+        }
+
+        function clearSavedToken() {
+            localStorage.removeItem('py_api_token');
+            localStorage.removeItem('py_api_refresh_token');
+            updateTokenUI();
+            closeTokenModal();
+            showToast('Token cleared from local storage');
+        }
+
+        function updateTokenUI() {
+            const token = getStoredToken();
+            const dot = document.getElementById('authDot');
+            const statusText = document.getElementById('authStatusText');
+            const display = document.getElementById('tokenDisplay');
+
+            if (token) {
+                dot.classList.add('active');
+                statusText.innerText = 'Token Active';
+                display.innerText = token.substring(0, 16) + '...' + token.substring(token.length - 8);
+                display.title = token;
+            } else {
+                dot.classList.remove('active');
+                statusText.innerText = 'No Token';
+                display.innerText = 'None';
+                display.title = 'No active token';
+            }
+        }
+
+        function decodeJwtPayload(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                if (!base64Url) return null;
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function openTokenModal() {
+            const token = getStoredToken();
+            const rToken = getStoredRefreshToken();
+            document.getElementById('modalTokenInput').value = token;
+            document.getElementById('modalRefreshTokenInput').value = rToken;
+            
+            const decodedCard = document.getElementById('jwtDecodedCard');
+            if (token) {
+                const decoded = decodeJwtPayload(token);
+                if (decoded) {
+                    decodedCard.style.display = 'block';
+                    decodedCard.innerHTML = '<div style="color:var(--accent-cyan); font-weight:600; margin-bottom:4px;">Decoded Claims:</div>' + syntaxHighlight(JSON.stringify(decoded, null, 2));
+                } else {
+                    decodedCard.style.display = 'none';
+                }
+            } else {
+                decodedCard.style.display = 'none';
+            }
+
+            document.getElementById('tokenModal').style.display = 'flex';
+        }
+
+        function closeTokenModal() {
+            document.getElementById('tokenModal').style.display = 'none';
+        }
+
+        function saveModalToken() {
+            const token = document.getElementById('modalTokenInput').value.trim();
+            const rToken = document.getElementById('modalRefreshTokenInput').value.trim();
+            setStoredToken(token, rToken);
+            closeTokenModal();
+            showToast('Token updated');
+        }
+
+        function quickTeacherLogin() {
+            document.getElementById('quickLoginModal').style.display = 'flex';
+        }
+
+        function closeQuickLoginModal() {
+            document.getElementById('quickLoginModal').style.display = 'none';
+        }
+
+        async function executeQuickLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            closeQuickLoginModal();
+
+            // Set preset and send
+            document.getElementById('targetUrl').value = 'api_teacher.php';
+            document.getElementById('httpMethod').value = 'POST';
+            document.getElementById('requestBody').value = JSON.stringify({
+                action: 'login',
+                email: email,
+                password: password
+            }, null, 2);
+
+            await sendRequest();
+        }
+
+        // Preset Loader
+        function loadPreset(key) {
+            const preset = PRESETS[key];
+            if (!preset) return;
+
+            document.getElementById('targetUrl').value = preset.url;
+            document.getElementById('httpMethod').value = preset.method;
+
+            // Highlight chip
+            document.querySelectorAll('.quick-chip').forEach(chip => {
+                if (chip.innerText.trim() === preset.url) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+
+            // Replace token placeholder
+            let bodyCopy = JSON.parse(JSON.stringify(preset.body));
+            const token = getStoredToken();
+            const rToken = getStoredRefreshToken();
+
+            if (bodyCopy.token === '{{TOKEN}}') {
+                bodyCopy.token = token || '';
+            }
+            if (bodyCopy.refresh_token === '{{REFRESH_TOKEN}}') {
+                bodyCopy.refresh_token = rToken || '';
+            }
+
+            document.getElementById('requestBody').value = JSON.stringify(bodyCopy, null, 2);
+            validateJsonInput();
+
+            // Highlight selected preset
+            document.querySelectorAll('.preset-item').forEach(item => item.classList.remove('active'));
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+
+            // Auto-update sample docs pane in background
+            updateSampleDocsContent(bodyCopy.action);
+        }
+
+        function setApiTarget(url) {
+            document.getElementById('targetUrl').value = url;
+            document.querySelectorAll('.quick-chip').forEach(chip => {
+                if (chip.innerText.trim() === url) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+        }
+
+        function filterPresets() {
+            const query = document.getElementById('presetSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.preset-item');
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // Request Builder Utilities
+        function validateJsonInput() {
+            const raw = document.getElementById('requestBody').value.trim();
+            const msg = document.getElementById('jsonValidationMsg');
+            if (!raw) {
+                msg.innerText = 'Empty';
+                msg.style.color = 'var(--text-muted)';
+                return true;
+            }
+            try {
+                const parsed = JSON.parse(raw);
+                msg.innerText = 'JSON Valid';
+                msg.style.color = 'var(--accent-emerald)';
+                if (parsed.action) {
+                    updateSampleDocsContent(parsed.action);
+                }
+                return true;
+            } catch (e) {
+                msg.innerText = 'Invalid JSON: ' + e.message;
+                msg.style.color = 'var(--accent-rose)';
+                return false;
+            }
+        }
+
+        function beautifyJson() {
+            const raw = document.getElementById('requestBody').value.trim();
+            try {
+                const parsed = JSON.parse(raw);
+                document.getElementById('requestBody').value = JSON.stringify(parsed, null, 2);
+                validateJsonInput();
+            } catch (e) {
+                showToast('Cannot format invalid JSON');
+            }
+        }
+
+        function clearBody() {
+            document.getElementById('requestBody').value = '{\n  \n}';
+            validateJsonInput();
+        }
+
+        function insertTokenIntoBody() {
+            const token = getStoredToken();
+            if (!token) {
+                showToast('No stored token found. Log in first!');
+                return;
+            }
+            try {
+                let parsed = JSON.parse(document.getElementById('requestBody').value || '{}');
+                parsed.token = token;
+                document.getElementById('requestBody').value = JSON.stringify(parsed, null, 2);
+                validateJsonInput();
+                showToast('Token injected into body');
+            } catch (e) {
+                showToast('Invalid JSON in body editor');
+            }
+        }
+
+        // Tab Switching
+        function switchReqTab(tab) {
+            document.getElementById('tabContentBody').style.display = tab === 'body' ? 'block' : 'none';
+            document.getElementById('tabContentHeaders').style.display = tab === 'headers' ? 'block' : 'none';
+            document.getElementById('tabContentHistory').style.display = tab === 'history' ? 'block' : 'none';
+
+            const tabButtons = event.target.parentElement.querySelectorAll('.tab-btn');
+            tabButtons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function switchResTab(tab) {
+            document.getElementById('resTabFormatted').style.display = tab === 'formatted' ? 'block' : 'none';
+            document.getElementById('resTabSampleDocs').style.display = tab === 'sampleDocs' ? 'block' : 'none';
+            document.getElementById('resTabRaw').style.display = tab === 'raw' ? 'block' : 'none';
+            document.getElementById('resTabHeaders').style.display = tab === 'resHeaders' ? 'block' : 'none';
+            document.getElementById('resTabJwt').style.display = tab === 'jwtInfo' ? 'block' : 'none';
+
+            document.querySelectorAll('.pane-body .tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Sample Response Renderer (Client-side instant preview)
+        function updateSampleDocsContent(action) {
+            if (!action) return;
+            const normAction = action.toLowerCase().trim();
+            const sample = SAMPLE_RESPONSES[normAction] || {
+                status: true,
+                message: "Sample response specification for '" + normAction + "'",
+                data: {}
+            };
+
+            document.getElementById('sampleActionBadge').innerText = normAction.toUpperCase();
+            document.getElementById('sampleJsonContent').innerHTML = syntaxHighlight(JSON.stringify(sample, null, 2));
+        }
+
+        function renderCurrentSampleResponse() {
+            let action = '';
+            try {
+                const parsed = JSON.parse(document.getElementById('requestBody').value || '{}');
+                action = parsed.action || '';
+            } catch (e) {}
+
+            updateSampleDocsContent(action || 'departments');
+            
+            // Switch to sample tab
+            document.getElementById('resTabFormatted').style.display = 'none';
+            document.getElementById('resTabSampleDocs').style.display = 'block';
+            document.getElementById('resTabRaw').style.display = 'none';
+            document.getElementById('resTabHeaders').style.display = 'none';
+            document.getElementById('resTabJwt').style.display = 'none';
+
+            document.querySelectorAll('.pane-body .tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tabBtnSampleDocs').classList.add('active');
+
+            document.getElementById('responseMeta').style.display = 'flex';
+            document.getElementById('statusBadge').className = 'status-pill status-sample';
+            document.getElementById('statusBadge').innerText = 'SAMPLE / DOCS';
+            document.getElementById('timeBadge').innerText = '0 ms (offline)';
+            document.getElementById('sizeBadge').innerText = 'Mock Data';
+
+            rawLastResponse = JSON.stringify(SAMPLE_RESPONSES[action] || {}, null, 2);
+            showToast('Showing sample response for: ' + (action || 'action'));
+        }
+
+        // Headers Table
+        function addHeaderRow() {
+            const tbody = document.getElementById('headersTableBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="kv-input hdr-key" placeholder="Key"></td>
+                <td><input type="text" class="kv-input hdr-val" placeholder="Value"></td>
+                <td><button class="btn btn-danger btn-sm" onclick="removeHeaderRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+            updateHeaderCount();
+        }
+
+        function removeHeaderRow(btn) {
+            btn.closest('tr').remove();
+            updateHeaderCount();
+        }
+
+        function updateHeaderCount() {
+            const count = document.querySelectorAll('#headersTableBody tr').length;
+            document.getElementById('headerCount').innerText = count;
+        }
+
+        function getRequestHeaders() {
+            const headers = {};
+            document.querySelectorAll('#headersTableBody tr').forEach(tr => {
+                const k = tr.querySelector('.hdr-key').value.trim();
+                const v = tr.querySelector('.hdr-val').value.trim();
+                if (k) {
+                    headers[k] = v;
+                }
+            });
+            return headers;
+        }
+
+        // Main Send Request Logic
+        async function sendRequest() {
+            const url = document.getElementById('targetUrl').value.trim();
+            const method = document.getElementById('httpMethod').value;
+            const autoInject = document.getElementById('autoInjectToken').checked;
+            const sendBtn = document.getElementById('sendBtn');
+            const autoMsg = document.getElementById('responseAutoActionMsg');
+            autoMsg.innerText = '';
+
+            if (!url) {
+                showToast('Target URL is required');
+                return;
+            }
+
+            let bodyContent = document.getElementById('requestBody').value.trim();
+            let parsedBody = null;
+
+            if (method !== 'GET' && bodyContent) {
+                try {
+                    parsedBody = JSON.parse(bodyContent);
+                    if (autoInject && !parsedBody.token && getStoredToken() && parsedBody.action !== 'login' && parsedBody.action !== 'app-version') {
+                        parsedBody.token = getStoredToken();
+                        document.getElementById('requestBody').value = JSON.stringify(parsedBody, null, 2);
+                    }
+                    bodyContent = JSON.stringify(parsedBody);
+                } catch (e) {
+                    showToast('Warning: Sending non-JSON or malformed payload');
+                }
+            }
+
+            const headers = getRequestHeaders();
+
+            // Switch to formatted live tab
+            document.getElementById('resTabFormatted').style.display = 'block';
+            document.getElementById('resTabSampleDocs').style.display = 'none';
+            document.getElementById('resTabRaw').style.display = 'none';
+            document.getElementById('resTabHeaders').style.display = 'none';
+            document.getElementById('resTabJwt').style.display = 'none';
+
+            document.querySelectorAll('.pane-body .tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tabBtnFormatted').classList.add('active');
+
+            // UI loading state
+            sendBtn.innerHTML = '<span class="status-dot active"></span> Sending...';
+            sendBtn.disabled = true;
+            document.getElementById('responseMeta').style.display = 'flex';
+            document.getElementById('statusBadge').className = 'status-pill status-pending';
+            document.getElementById('statusBadge').innerText = 'PENDING';
+            document.getElementById('timeBadge').innerText = '...';
+            document.getElementById('sizeBadge').innerText = '...';
+
+            const startTime = performance.now();
+
+            try {
+                const fetchOptions = {
+                    method: method,
+                    headers: headers
+                };
+
+                if (method !== 'GET' && bodyContent) {
+                    fetchOptions.body = bodyContent;
+                }
+
+                const response = await fetch(url, fetchOptions);
+                const duration = Math.round(performance.now() - startTime);
+                const rawText = await response.text();
+                const sizeBytes = new Blob([rawText]).size;
+
+                rawLastResponse = rawText;
+
+                // Format Size
+                let sizeStr = sizeBytes + ' B';
+                if (sizeBytes > 1024) sizeStr = (sizeBytes / 1024).toFixed(1) + ' KB';
+
+                // Status Badge
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.innerText = `${response.status} ${response.statusText || ''}`;
+                statusBadge.className = 'status-pill ' + (response.status >= 200 && response.status < 300 ? 'status-2xx' : (response.status >= 400 && response.status < 500 ? 'status-4xx' : 'status-5xx'));
+
+                document.getElementById('timeBadge').innerText = duration + ' ms';
+                document.getElementById('sizeBadge').innerText = sizeStr;
+
+                // Display Headers
+                let headersText = '';
+                response.headers.forEach((val, key) => {
+                    headersText += `${key}: ${val}\n`;
+                });
+                document.getElementById('resTabHeaders').innerText = headersText || 'No response headers available';
+
+                // Raw response
+                document.getElementById('resTabRaw').innerText = rawText;
+
+                // JSON formatting & Auto-token extraction
+                let jsonParsed = null;
+                try {
+                    jsonParsed = JSON.parse(rawText);
+                    lastResponseObj = jsonParsed;
+                } catch (e) {
+                    lastResponseObj = null;
+                }
+
+                document.getElementById('resEmptyState').style.display = 'none';
+                const formattedDiv = document.getElementById('formattedJsonContent');
+                formattedDiv.style.display = 'block';
+
+                if (jsonParsed !== null) {
+                    formattedDiv.innerHTML = syntaxHighlight(JSON.stringify(jsonParsed, null, 2));
+
+                    // Auto extract token from login response
+                    if (jsonParsed.access_token || jsonParsed.token) {
+                        const tok = jsonParsed.access_token || jsonParsed.token;
+                        setStoredToken(tok, jsonParsed.refresh_token || null);
+                        autoMsg.innerText = '✓ Extracted and saved JWT token from response!';
+                    } else if (jsonParsed.data && (jsonParsed.data.access_token || jsonParsed.data.token)) {
+                        const tok = jsonParsed.data.access_token || jsonParsed.data.token;
+                        setStoredToken(tok, jsonParsed.data.refresh_token || null);
+                        autoMsg.innerText = '✓ Extracted and saved JWT token from response.data!';
+                    }
+
+                    // Check if token exists in response or active token to show JWT tab
+                    const tokenForJwt = jsonParsed.access_token || jsonParsed.token || (jsonParsed.data && (jsonParsed.data.access_token || jsonParsed.data.token)) || getStoredToken();
+                    if (tokenForJwt) {
+                        const decoded = decodeJwtPayload(tokenForJwt);
+                        if (decoded) {
+                            document.getElementById('jwtTabBtn').style.display = 'inline-block';
+                            document.getElementById('resTabJwt').innerHTML = '<div style="color:var(--accent-cyan); font-weight:700; margin-bottom:8px;">Decoded JWT Payload:</div>' + syntaxHighlight(JSON.stringify(decoded, null, 2));
+                        }
+                    }
+                } else {
+                    formattedDiv.innerHTML = `<div style="color:var(--accent-amber); font-weight:600; margin-bottom:8px;">Response is not valid JSON (e.g. PHP warnings/errors):</div><pre style="color:#e2e8f0; white-space:pre-wrap;">${escapeHtml(rawText)}</pre>`;
+                }
+
+                // Save to history
+                saveToHistory({
+                    url: url,
+                    method: method,
+                    action: parsedBody ? parsedBody.action : '',
+                    status: response.status,
+                    duration: duration,
+                    timestamp: new Date().toLocaleTimeString(),
+                    body: bodyContent
+                });
+
+            } catch (err) {
+                const duration = Math.round(performance.now() - startTime);
+                document.getElementById('statusBadge').innerText = 'FETCH ERROR';
+                document.getElementById('statusBadge').className = 'status-pill status-5xx';
+                document.getElementById('timeBadge').innerText = duration + ' ms';
+                document.getElementById('sizeBadge').innerText = '0 B';
+
+                document.getElementById('resEmptyState').style.display = 'none';
+                const formattedDiv = document.getElementById('formattedJsonContent');
+                formattedDiv.style.display = 'block';
+                formattedDiv.innerHTML = `<div style="color:var(--accent-rose); font-weight:600;">Request failed:</div><div>${escapeHtml(err.message)}</div><div style="color:var(--text-muted); margin-top:8px; font-size:11px;">Tip: Click "View Sample Output" above to preview the expected response schema without making backend requests.</div>`;
+                document.getElementById('resTabRaw').innerText = err.stack || err.message;
+            } finally {
+                sendBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Send (Ctrl+Enter)';
+                sendBtn.disabled = false;
+            }
+        }
+
+        // JSON Syntax Highlighter
+        function syntaxHighlight(json) {
+            json = escapeHtml(json);
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // History Storage
+        function saveToHistory(item) {
+            try {
+                let list = JSON.parse(localStorage.getItem('py_api_history') || '[]');
+                list.unshift(item);
+                if (list.length > 25) list = list.slice(0, 25);
+                localStorage.setItem('py_api_history', JSON.stringify(list));
+                loadHistoryUI();
+            } catch (e) {}
+        }
+
+        function loadHistoryUI() {
+            const container = document.getElementById('historyList');
+            try {
+                const list = JSON.parse(localStorage.getItem('py_api_history') || '[]');
+                if (list.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; padding: 10px; text-align: center;">No previous requests yet.</div>';
+                    return;
+                }
+                container.innerHTML = '';
+                list.forEach((item, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'history-item';
+                    const statusClass = item.status >= 200 && item.status < 300 ? 'badge-post' : 'badge-auth';
+                    el.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                            <span class="preset-badge ${statusClass}">${item.status || 'ERR'}</span>
+                            <span style="font-weight:600; color:var(--text-primary);">${escapeHtml(item.action || item.url)}</span>
+                            <span style="color:var(--text-muted); font-size:10px;">${item.timestamp}</span>
+                        </div>
+                        <span style="color:var(--text-muted); font-family:var(--font-mono); font-size:10px;">${item.duration}ms</span>
+                    `;
+                    el.onclick = () => {
+                        document.getElementById('targetUrl').value = item.url;
+                        document.getElementById('httpMethod').value = item.method;
+                        document.getElementById('requestBody').value = item.body || '';
+                        validateJsonInput();
+                        switchReqTab('body');
+                        showToast('Loaded request from history');
+                    };
+                    container.appendChild(el);
+                });
+            } catch (e) {}
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('py_api_history');
+            loadHistoryUI();
+            showToast('History cleared');
+        }
+
+        // Response actions
+        function copyResponse() {
+            if (!rawLastResponse) {
+                showToast('No response to copy');
+                return;
+            }
+            navigator.clipboard.writeText(rawLastResponse).then(() => {
+                showToast('Response copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy');
+            });
+        }
+
+        function downloadResponse() {
+            if (!rawLastResponse) {
+                showToast('No response to download');
+                return;
+            }
+            const blob = new Blob([rawLastResponse], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `api_response_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Downloaded response');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

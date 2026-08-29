@@ -72,7 +72,7 @@ export async function bulkUploadStudents(
   formData: FormData
 ): Promise<BulkUploadResult> {
   const actor = await requirePermission("user:create");
-  if (actor.role !== "SUPER_ADMIN") {
+  if (actor.role !== "MANAGER") {
     throw new Error("Only Super Admin can bulk upload students.");
   }
 
@@ -136,7 +136,7 @@ export async function bulkUploadStudents(
         name: data.name,
         email: data.email,
         password,
-        role: "STUDENT",
+        role: "INTERN",
         companyId,
         phone: data.phone,
       });

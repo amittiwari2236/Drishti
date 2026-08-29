@@ -7,7 +7,7 @@ import { ProjectForm } from "@/features/projects/components/project-form";
 export const metadata: Metadata = { title: "New Project" };
 
 export default async function NewProjectPage() {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN");
+  const user = await requireRole("MANAGER", "MANAGER");
   const scope = await companyScope(user);
 
   const [batches, companies] = await Promise.all([
@@ -16,7 +16,7 @@ export default async function NewProjectPage() {
       select: { id: true, name: true },
       orderBy: { startDate: "desc" },
     }),
-    user.role === "SUPER_ADMIN" && !scope
+    user.role === "MANAGER" && !scope
       ? prisma.company.findMany({
           where: { status: "ACTIVE" },
           select: { id: true, name: true },

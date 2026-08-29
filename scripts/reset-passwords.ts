@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Fetching all student users...");
   const students = await prisma.user.findMany({
-    where: { role: "STUDENT" },
+    where: { role: "INTERN" },
     select: { id: true, email: true },
   });
 

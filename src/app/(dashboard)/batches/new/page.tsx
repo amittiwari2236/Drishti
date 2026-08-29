@@ -7,10 +7,10 @@ import { BatchForm } from "@/features/batches/components/batch-form";
 export const metadata: Metadata = { title: "New Batch" };
 
 export default async function NewBatchPage() {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "COORDINATOR");
+  const user = await requireRole("MANAGER", "MANAGER", "SENIOR");
 
   let companies;
-  if (user.role === "SUPER_ADMIN" && !(await companyScope(user))) {
+  if (user.role === "MANAGER" && !(await companyScope(user))) {
     companies = await prisma.company.findMany({
       where: { status: "ACTIVE" },
       select: { id: true, name: true },

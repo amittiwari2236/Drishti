@@ -152,7 +152,7 @@ export async function GET(
   if (type === "summary") {
     const [students, projects, tasksDone, tasksOpen, reports] =
       await Promise.all([
-        prisma.user.count({ where: { role: "STUDENT", ...scope } }),
+        prisma.user.count({ where: { role: "INTERN", ...scope } }),
         prisma.project.count({ where: { ...scope, deletedAt: null } }),
         prisma.task.count({
           where: { ...scope, deletedAt: null, status: "COMPLETED" },

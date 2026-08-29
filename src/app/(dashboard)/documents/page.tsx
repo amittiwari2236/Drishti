@@ -38,7 +38,7 @@ export default async function DocumentsPage() {
     }),
     canManage
       ? prisma.user.findMany({
-          where: { role: "STUDENT", deletedAt: null, ...scope },
+          where: { role: "INTERN", deletedAt: null, ...scope },
           select: { id: true, name: true },
           orderBy: { name: "asc" },
         })

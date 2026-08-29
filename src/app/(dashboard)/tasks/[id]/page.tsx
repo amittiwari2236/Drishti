@@ -77,14 +77,14 @@ export default async function TaskDetailPage({
     include: { reviewer: { select: { name: true } } },
   });
 
-  const isStudent = user.role === "STUDENT";
+  const isStudent = user.role === "INTERN";
   const isAssignee = task.assigneeId === user.id;
 
-  // Full task managers (SUPER_ADMIN + roles with task:assign like TEACHER, MENTOR,
-  // INSTRUCTOR, COORDINATOR, COMPANY_ADMIN) can edit any task in their company scope.
+  // Full task managers (MANAGER + roles with task:assign like SENIOR, EXECUTIVE,
+  // EXECUTIVE, SENIOR, MANAGER) can edit any task in their company scope.
   // Others (students, basic roles) can only edit tasks they created or are assigned to.
   const isFullManager =
-    user.role === "SUPER_ADMIN" ||
+    user.role === "MANAGER" ||
     can(user, "task:assign");
 
   const canEdit =
@@ -150,7 +150,7 @@ export default async function TaskDetailPage({
         }
         actions={
           <>
-            {user.role === "SUPER_ADMIN" && task.approval?.status === "PENDING" && (
+            {user.role === "MANAGER" && task.approval?.status === "PENDING" && (
               <TaskApprovalButtons taskId={task.id} />
             )}
             {isStudent && isAssignee && (

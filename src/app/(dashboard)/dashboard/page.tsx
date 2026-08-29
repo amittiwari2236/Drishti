@@ -33,6 +33,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EndWorkDayButton } from "@/features/workflow/end-work-day-button";
 import { recordLoginTime } from "@/features/workflow/actions";
+import { fetchPragyaAPI } from "@/lib/pragya-api";
+import { cookies } from "next/headers";
+
+// IMPORT THE NEW ROLE DASHBOARDS
+import { AdminDashboardView, LeadDashboardView, MemberDashboardView } from "@/features/dashboard/components/role-views";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -47,6 +52,8 @@ function formatMinutes(mins: number): string {
   const m = mins % 60;
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
+
+
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -65,13 +72,12 @@ export default async function DashboardPage() {
   const hasProposalsAccess = can(user, "feature:propose");
   const hasAnalyticsAccess = can(user, "feature:analytics");
   const hasCalendarAccess = can(user, "feature:calendar");
-  const hasPermissionsAccess = can(user, "feature:permissions") || user.role === "SUPER_ADMIN";
-  const hasTaskReadAccess = can(user, "task:read");
+  const hasPermissionsAccess = can(user, "feature:permissions") || user.role === "MANAGER";
 
-  const [companies, students, projects, batches, openTasks, reportsToday, myAssignedTasks] =
+  const [companies, students, projects, batches, openTasks, reportsToday] =
     await Promise.all([
       hasCompaniesAccess ? prisma.company.count() : Promise.resolve(0),
-      hasStudentsAccess ? prisma.user.count({ where: { role: "STUDENT", ...scope } }) : Promise.resolve(0),
+      hasStudentsAccess ? prisma.user.count({ where: { role: "INTERN", ...scope } }) : Promise.resolve(0),
       hasProjectsAccess ? prisma.project.count({ where: { ...scope } }) : Promise.resolve(0),
       hasBatchesAccess ? prisma.batch.count({ where: { ...scope } }) : Promise.resolve(0),
       hasTasksAccess
@@ -79,7 +85,7 @@ export default async function DashboardPage() {
             where: {
               ...scope,
               status: { notIn: ["COMPLETED", "CANCELLED"] },
-              ...(user.role === "STUDENT" ? { assigneeId: user.id } : {}),
+              ...(user.role === "INTERN" ? { assigneeId: user.id } : {}),
               OR: [
                 { approval: null },
                 { approval: { status: "APPROVED" } },
@@ -92,32 +98,127 @@ export default async function DashboardPage() {
             where: {
               ...scope,
               date: today,
-              ...(user.role === "STUDENT" ? { studentId: user.id } : {}),
+              ...(user.role === "INTERN" ? { studentId: user.id } : {}),
             },
           })
         : Promise.resolve(0),
-      hasTaskReadAccess
-        ? prisma.task.findMany({
-            where: {
-              assigneeId: user.id,
-              status: { notIn: ["COMPLETED", "CANCELLED"] },
-              OR: [
-                { approval: null },
-                { approval: { status: "APPROVED" } },
-              ],
-            },
-            select: {
-              id: true,
-              title: true,
-              status: true,
-              priority: true,
-              deadline: true,
-            },
-            take: 5,
-            orderBy: { createdAt: "desc" },
-          })
-        : Promise.resolve([]),
     ]);
+
+  // ROLE-BASED DASHBOARD DATA FETCHING (Realistic replacement of client HTML dummy data)
+  const isAdmin = user.role === "MANAGER";
+  const isLead = user.role === "SENIOR" || user.role === "EXECUTIVE";
+  // Fallback to member if not admin or lead
+
+  let localDepartments: (Department & { _count: { tasks: number } })[] = [];
+  let roleProjects: any[] = [];
+  let roleTasks: any[] = [];
+  let teamMembers: User[] = [];
+  let pragyaDepartments: any[] = [];
+  let pragyaStats: any = null;
+  let pragyaSchedule: any[] = [];
+
+  const token = (await cookies()).get('pragya_jwt')?.value;
+
+  try {
+    if (token === "DUMMY_TOKEN_FOR_DEMO") {
+      // Provide completely offline mock data for dummy accounts for instant login
+      pragyaDepartments = [
+        { id: 1, name: 'Technology', code: 'TECH', roles: [{id: 1, name: 'Developer', hierarchy_level: 3}, {id: 2, name: 'Tech Lead', hierarchy_level: 2}] },
+        { id: 2, name: 'Finance', code: 'FIN', roles: [] },
+        { id: 5, name: 'Teaching', code: 'TEACHING', roles: [{id: 3, name: 'Instructor', hierarchy_level: 3}] }
+      ];
+      pragyaStats = { total_classes: 42, total_hours: 128 };
+      pragyaSchedule = [
+        { title: "Yoga Basics", date: "Tomorrow, 10:00 AM", room: "Studio A" },
+        { title: "Advanced Meditation", date: "Friday, 06:00 PM", room: "Studio B" },
+        { title: "Teacher Training", date: "Saturday, 08:00 AM", room: "Main Hall" }
+      ];
+    } else {
+      // Fetch concurrently to avoid long loading times
+      const apiPromises = [fetchPragyaAPI('departments')];
+      if (token) {
+        apiPromises.push(fetchPragyaAPI('stats', token));
+        apiPromises.push(fetchPragyaAPI('schedule', token));
+      }
+
+      const results = await Promise.all(apiPromises);
+      pragyaDepartments = results[0]?.status ? results[0].data : [];
+      
+      if (token) {
+        pragyaStats = results[1]?.status ? results[1].data : null;
+        pragyaSchedule = results[2]?.status ? results[2].data : [];
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch from Pragya API", e);
+  }
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+
+  const userDepartment = dbUser?.departmentId 
+    ? await prisma.department.findUnique({ where: { id: dbUser.departmentId } }) 
+    : null;
+
+
+  const allPragyaRoles = pragyaDepartments.flatMap((d: any) => d.roles?.map((r: any) => r.name) || []);
+  const defaultRoles = ["Tech Lead", "Finance Manager", "Event Manager", "Instructor", "Front Desk Lead"];
+  const pragyaRoleNames = allPragyaRoles.length > 0 ? allPragyaRoles : defaultRoles;
+
+  // Give the logged in user a Pragya role based on their ID length or randomly
+  const userPragyaRole = pragyaRoleNames[user.id.length % pragyaRoleNames.length];
+
+  if (isAdmin) {
+    roleTasks = await prisma.task.findMany({
+      where: { ...scope },
+      include: { assignee: true }
+    });
+    
+    const depts = await prisma.department.findMany({
+      where: scope as any
+    });
+    
+    localDepartments = depts.map(d => ({
+      ...d,
+      _count: { tasks: roleTasks.filter(t => t.targetDepartmentId === d.id).length }
+    }));
+    
+    roleProjects = await prisma.project.findMany({
+      where: { ...scope },
+      include: { tasks: true }
+    });
+  } else if (isLead) {
+    if (dbUser?.departmentId) {
+      const members = await prisma.user.findMany({
+        where: { departmentId: dbUser.departmentId, ...scope } as any
+      });
+      teamMembers = members.map((m: any, idx: number) => ({
+        ...m,
+        displayRole: pragyaRoleNames[idx % pragyaRoleNames.length]
+      }));
+    }
+    const memberIds = teamMembers.map(m => m.id);
+    roleTasks = await prisma.task.findMany({
+      where: { assigneeId: { in: [...memberIds, user.id] }, ...scope },
+      include: { assignee: true }
+    });
+    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId)));
+    roleProjects = await prisma.project.findMany({
+      where: { id: { in: projectIds } },
+      include: { tasks: true }
+    });
+  } else {
+    // Member View
+    roleTasks = await prisma.task.findMany({
+      where: { assigneeId: user.id, ...scope },
+      include: { assignee: true }
+    });
+    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId)));
+    roleProjects = await prisma.project.findMany({
+      where: { id: { in: projectIds } },
+      include: { tasks: true }
+    });
+  }
+
 
   // ── Student: auto-record login + fetch today's timeline ────────────────
   let timeline: {
@@ -130,7 +231,7 @@ export default async function DashboardPage() {
 
   let todayAcknowledgements: { taskId: string; status: "ON_TIME" | "LATE"; task: { title: string } }[] = [];
 
-  if (user.role === "STUDENT") {
+  if (user.role === "INTERN") {
     await recordLoginTime().catch(() => {});
 
     timeline = await prisma.dailyTimeline.findUnique({
@@ -162,7 +263,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <PageHeader
         title={`${greeting}, ${user.name.split(" ")[0]}`}
-        description={`You are signed in as ${ROLE_LABELS[user.role]}.`}
+        description={`You are signed in as ${userPragyaRole}${userDepartment ? ` in the ${userDepartment.name} department` : ""}.`}
       />
 
       {/* ── Stat Cards (Filtered strictly by permitted features) ──────────────── */}
@@ -181,7 +282,7 @@ export default async function DashboardPage() {
         )}
         {hasTasksAccess && (
           <StatCard
-            title={user.role === "STUDENT" ? "My open tasks" : "Open tasks"}
+            title={user.role === "INTERN" ? "My open tasks" : "Open tasks"}
             value={openTasks}
             icon={ListTodo}
           />
@@ -189,12 +290,12 @@ export default async function DashboardPage() {
         {hasDailyLogsAccess && (
           <StatCard
             title={
-              user.role === "STUDENT"
+              user.role === "INTERN"
                 ? "Today's report"
                 : "Reports submitted today"
             }
             value={
-              user.role === "STUDENT"
+              user.role === "INTERN"
                 ? reportsToday > 0
                   ? "Submitted"
                   : "Pending"
@@ -318,55 +419,36 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* ── My Assigned Tasks Section ───────────────────────────────────── */}
-      {myAssignedTasks.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ListTodo className="size-5 text-primary" />
-              My Assigned Tasks
-            </CardTitle>
-            <CardDescription>
-              Tasks specifically assigned to your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="divide-y rounded-md border">
-              {myAssignedTasks.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between p-3 text-sm hover:bg-muted/50 transition-colors"
-                >
-                  <div className="space-y-0.5">
-                    <Link
-                      href={`/tasks/${t.id}`}
-                      className="font-medium text-foreground hover:underline"
-                    >
-                      {t.title}
-                    </Link>
-                    {t.deadline && (
-                      <p className="text-xs text-muted-foreground">
-                        Due {format(new Date(t.deadline), "MMM d, yyyy")}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {t.priority}
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs font-normal">
-                      {t.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* ── Role-Based Dashboard Views (Pragya Flow Concepts) ────────── */}
+      {isAdmin ? (
+        <AdminDashboardView 
+          projects={roleProjects} 
+          tasks={roleTasks} 
+          departments={localDepartments} 
+          pragyaDepartments={pragyaDepartments}
+          pragyaStats={pragyaStats}
+          pragyaSchedule={pragyaSchedule}
+        />
+      ) : isLead ? (
+        <LeadDashboardView 
+          user={{ id: user.id, name: user.name, role: userPragyaRole }}
+          projects={roleProjects}
+          tasks={roleTasks}
+          teamMembers={teamMembers}
+          pragyaStats={pragyaStats}
+          pragyaSchedule={pragyaSchedule}
+        />
+      ) : (
+        <MemberDashboardView 
+          projects={roleProjects}
+          tasks={roleTasks}
+          pragyaStats={pragyaStats}
+          pragyaSchedule={pragyaSchedule}
+        />
       )}
 
       {/* ── Student Daily Timeline Widget ────────────────────────────────── */}
-      {user.role === "STUDENT" && (
+      {user.role === "INTERN" && (
         <Card className="border-indigo-100 dark:border-indigo-900/40">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">

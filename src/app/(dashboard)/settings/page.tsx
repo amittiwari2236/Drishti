@@ -39,7 +39,7 @@ export default async function SettingsPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const user = await requireUser();
-  if (!can(user, "settings:manage") && user.role !== "SUPER_ADMIN") {
+  if (!can(user, "settings:manage") && user.role !== "MANAGER") {
     redirect("/dashboard");
   }
 
@@ -129,7 +129,7 @@ export default async function SettingsPage({
     designation: u.designation,
   }));
 
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isSuperAdmin = user.role === "MANAGER";
   const defaultTab = requestedTab || (isSuperAdmin ? "permissions" : "holidays");
 
   return (

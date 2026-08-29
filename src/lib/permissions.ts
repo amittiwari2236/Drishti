@@ -32,7 +32,7 @@ export function can(
     typeof userOrRole === "object" ? userOrRole.id : undefined;
 
   // Super Admin is never restricted
-  if (role === "SUPER_ADMIN") return true;
+  if (role === "MANAGER") return true;
 
   // Check user-level override if provided
   if (userId && dynamicUserOverridesCache.has(userId)) {

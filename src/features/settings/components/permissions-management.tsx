@@ -61,61 +61,61 @@ export type UserItem = {
 
 const ALL_ROLES: { role: Role; label: string; description: string; badgeColor: string }[] = [
   {
-    role: "SUPER_ADMIN",
+    role: "MANAGER",
     label: "Super Admin",
     description: "Highest system authority. Full unrestricted control over all features & permissions.",
     badgeColor: "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border-purple-300",
   },
   {
-    role: "TEACHER",
+    role: "SENIOR",
     label: "Teacher",
     description: "Course faculty & academic lead. Manages tasks, reviews student logs, and event proposals.",
     badgeColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300",
   },
   {
-    role: "FINANCE",
+    role: "EXECUTIVE",
     label: "Finance",
     description: "Financial administrator. Oversees budgets, pricing, financial analytics, and contracts.",
     badgeColor: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300",
   },
   {
-    role: "DESIGNER",
+    role: "EXECUTIVE",
     label: "Designer",
     description: "UI/UX & creative assets lead. Manages design tasks, prototypes, and asset deliverables.",
     badgeColor: "bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-300 border-pink-300",
   },
   {
-    role: "INSTRUCTOR",
+    role: "EXECUTIVE",
     label: "Instructor",
     description: "Hands-on technical mentor. Manages assigned workshops, reviews work, and logs attendance.",
     badgeColor: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border-sky-300",
   },
   {
-    role: "SCHEDULE_MANAGER",
+    role: "SENIOR",
     label: "Schedule Manager",
     description: "Operations planner. Schedules events, books dates, and coordinates multi-day timelines.",
     badgeColor: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-300",
   },
   {
-    role: "COMPANY_ADMIN",
+    role: "MANAGER",
     label: "Company Admin",
     description: "Company workspace administrator. Manages company batches, mentors, and projects.",
     badgeColor: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-300",
   },
   {
-    role: "COORDINATOR",
+    role: "SENIOR",
     label: "Coordinator",
     description: "Program coordinator. Oversees batches, attendance rosters, and student allocations.",
     badgeColor: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 border-teal-300",
   },
   {
-    role: "MENTOR",
+    role: "EXECUTIVE",
     label: "Mentor",
     description: "Project guide. Evaluates daily work logs, assigns tasks, and conducts reviews.",
     badgeColor: "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300 border-cyan-300",
   },
   {
-    role: "STUDENT",
+    role: "INTERN",
     label: "Student / Intern",
     description: "Intern participant. Tracks assigned tasks, moves board cards, and logs daily work.",
     badgeColor: "bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-300 border-slate-300",
@@ -142,7 +142,7 @@ export function PermissionsManagement({
   initialUserOverrides: UserOverrideRow[];
   users: UserItem[];
 }) {
-  const [selectedRole, setSelectedRole] = useState<Role>("TEACHER");
+  const [selectedRole, setSelectedRole] = useState<Role>("SENIOR");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>(users[0]?.id ?? "");
@@ -163,13 +163,13 @@ export function PermissionsManagement({
     // Start with defaults
     const defaults = DEFAULT_ROLE_PERMISSIONS[selectedRole] ?? [];
     for (const p of PERMISSION_DEFINITIONS) {
-      map.set(p.code, selectedRole === "SUPER_ADMIN" ? true : defaults.includes(p.code));
+      map.set(p.code, selectedRole === "MANAGER" ? true : defaults.includes(p.code));
     }
 
     // Apply DB values
     for (const row of rolePermissionsState) {
       if (row.role === selectedRole) {
-        map.set(row.permissionCode, selectedRole === "SUPER_ADMIN" ? true : row.allowed);
+        map.set(row.permissionCode, selectedRole === "MANAGER" ? true : row.allowed);
       }
     }
 
@@ -212,7 +212,7 @@ export function PermissionsManagement({
 
   // Handle single permission toggle
   function handleTogglePermission(code: string, currentAllowed: boolean) {
-    if (selectedRole === "SUPER_ADMIN") {
+    if (selectedRole === "MANAGER") {
       toast.info("Super Admin has all permissions unconditionally by design.");
       return;
     }
@@ -244,7 +244,7 @@ export function PermissionsManagement({
 
   // Handle reset to default matrix
   function handleResetDefaults() {
-    if (selectedRole === "SUPER_ADMIN") return;
+    if (selectedRole === "MANAGER") return;
 
     startTransition(async () => {
       try {
@@ -270,7 +270,7 @@ export function PermissionsManagement({
 
   // Handle grant all
   function handleGrantAll() {
-    if (selectedRole === "SUPER_ADMIN") return;
+    if (selectedRole === "MANAGER") return;
 
     startTransition(async () => {
       try {
@@ -332,7 +332,7 @@ export function PermissionsManagement({
         // Rebuild local state from defaults
         const newState: RolePermissionRow[] = [];
         for (const [roleKey, perms] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
-          if (roleKey === "SUPER_ADMIN") continue;
+          if (roleKey === "MANAGER") continue;
           for (const def of PERMISSION_DEFINITIONS) {
             newState.push({
               role: roleKey as import("@prisma/client").Role,
@@ -390,7 +390,7 @@ export function PermissionsManagement({
               const isSelected = selectedRole === r.role;
               return (
                 <button
-                  key={r.role}
+                  key={r.label}
                   type="button"
                   onClick={() => setSelectedRole(r.role)}
                   className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all duration-200 ${
@@ -401,7 +401,7 @@ export function PermissionsManagement({
                 >
                   <div className="flex w-full items-center justify-between">
                     <span className="font-bold text-xs">{r.label}</span>
-                    {r.role === "SUPER_ADMIN" && (
+                    {r.role === "MANAGER" && (
                       <span className="text-[10px] text-purple-600 font-bold">★ Master</span>
                     )}
                   </div>
@@ -427,7 +427,7 @@ export function PermissionsManagement({
                   <p className="text-xs text-muted-foreground">{roleMeta.description}</p>
                 </div>
 
-                {selectedRole !== "SUPER_ADMIN" ? (
+                {selectedRole !== "MANAGER" ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
                       variant="outline"
@@ -493,7 +493,7 @@ export function PermissionsManagement({
           <div className="space-y-3">
             {filteredPermissions.map((def) => {
               const isAllowed = activeRolePermissionsMap.get(def.code) ?? false;
-              const isSuper = selectedRole === "SUPER_ADMIN";
+              const isSuper = selectedRole === "MANAGER";
 
               return (
                 <div
@@ -581,9 +581,9 @@ export function PermissionsManagement({
               <div className="space-y-2">
                 {PERMISSION_DEFINITIONS.map((def) => {
                   const baseAllowed =
-                    activeUser?.role === "SUPER_ADMIN"
+                    activeUser?.role === "MANAGER"
                       ? true
-                      : DEFAULT_ROLE_PERMISSIONS[activeUser?.role ?? "STUDENT"]?.includes(def.code) ??
+                      : DEFAULT_ROLE_PERMISSIONS[activeUser?.role ?? "INTERN"]?.includes(def.code) ??
                         false;
                   const overrideVal = activeUserOverridesMap.get(def.code);
 
@@ -675,7 +675,7 @@ export function PermissionsManagement({
                   <tr className="border-b bg-muted/50 font-bold">
                     <th className="p-3">Feature Module</th>
                     {ALL_ROLES.map((r) => (
-                      <th key={r.role} className="p-2 text-center">
+                      <th key={r.label} className="p-2 text-center">
                         {r.label}
                       </th>
                     ))}
@@ -694,7 +694,7 @@ export function PermissionsManagement({
                         {ALL_ROLES.map((r) => {
                           // Use live DB-backed state for accuracy (not just static defaults)
                           let isAllowed: boolean;
-                          if (r.role === "SUPER_ADMIN") {
+                          if (r.role === "MANAGER") {
                             isAllowed = true;
                           } else {
                             // Check DB-backed rolePermissionsState first
@@ -709,7 +709,7 @@ export function PermissionsManagement({
                             }
                           }
                           return (
-                            <td key={r.role} className="p-2 text-center">
+                            <td key={r.label} className="p-2 text-center">
                               {isAllowed ? (
                                 <CheckCircle2 className="mx-auto size-4 text-emerald-500" />
                               ) : (

@@ -36,7 +36,7 @@ export default async function TasksPage({
     deletedAt: null,
     ...(projectId ? { projectId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
-    ...(user.role === "STUDENT" ? { assigneeId: user.id } : {}),
+    ...(user.role === "INTERN" ? { assigneeId: user.id } : {}),
     ...(isPendingFilter
       ? { approval: { status: "PENDING" } }
       : {
@@ -52,7 +52,7 @@ export default async function TasksPage({
       where: {
         ...scope,
         deletedAt: null,
-        ...(user.role === "STUDENT"
+        ...(user.role === "INTERN"
           ? { students: { some: { userId: user.id } } }
           : {}),
       },
@@ -95,7 +95,7 @@ export default async function TasksPage({
               projects={projects}
               project={projectId ?? ""}
               status={statusFilter ?? (isPendingFilter ? "pending_approval" : "")}
-              showPendingOption={user.role === "SUPER_ADMIN"}
+              showPendingOption={user.role === "MANAGER"}
             />
             {canCreate && (
               <Button asChild>

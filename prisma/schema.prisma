@@ -11,16 +11,10 @@ datasource db {
 // ─────────────────────────── ENUMS ───────────────────────────
 
 enum Role {
-  SUPER_ADMIN
-  COMPANY_ADMIN
-  COORDINATOR
-  MENTOR
-  STUDENT
-  TEACHER
-  FINANCE
-  DESIGNER
-  INSTRUCTOR
-  SCHEDULE_MANAGER
+  MANAGER
+  SENIOR
+  EXECUTIVE
+  INTERN
 }
 
 enum CompanyStatus {
@@ -83,6 +77,8 @@ enum TeamRole {
 
 enum TaskStatus {
   PENDING
+  PENDING_ACCEPTANCE
+  BACKLOG
   IN_PROGRESS
   BLOCKED
   REVIEW
@@ -244,7 +240,7 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
-  role          Role      @default(STUDENT)
+  role          Role      @default(INTERN)
   companyId     String?
   phone         String?
   designation   String?
@@ -254,10 +250,17 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
+  externalId    String?   @unique
+  departmentId  String?
+  hierarchyLevel Int?
+  isTeamLead    Boolean   @default(false)
+
   company          Company?         @relation(fields: [companyId], references: [id])
   sessions         Session[]
   accounts         Account[]
   studentProfile   StudentProfile?
+  department       Department?      @relation(fields: [departmentId], references: [id])
+  headedDepartments Department[]    @relation("DepartmentHead")
   teamMemberships  TeamMember[]
   assignedTasks    Task[]           @relation("TaskAssignee")
   createdTasks     Task[]           @relation("TaskCreator")
@@ -284,6 +287,7 @@ model User {
   reviewedApprovals      TaskApproval[]          @relation("ApprovalReviewer")
 
   @@index([companyId])
+  @@index([departmentId])
   @@index([role])
   @@map("user")
 }
@@ -359,6 +363,7 @@ model Company {
   deletedAt          DateTime?
 
   users        User[]
+  departments  Department[]
   batches      Batch[]
   projects     Project[]
   teams        Team[]
@@ -375,6 +380,25 @@ model Company {
 
   @@index([status])
   @@map("company")
+}
+
+// ───────────────────────── DEPARTMENT ─────────────────────────
+
+model Department {
+  id        String   @id @default(cuid())
+  companyId String
+  name      String
+  color     String?
+  headId    String?
+
+  company   Company  @relation(fields: [companyId], references: [id])
+  head      User?    @relation("DepartmentHead", fields: [headId], references: [id])
+  users     User[]
+  tasks     Task[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@map("department")
 }
 
 // ─────────────────────────── BATCH ───────────────────────────
@@ -573,6 +597,7 @@ model Task {
   actualHours    Float?
   order          Float      @default(0)
   assigneeId     String?
+  targetDepartmentId String?
   completedAt    DateTime?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -585,6 +610,7 @@ model Task {
   parent      Task?            @relation("Subtasks", fields: [parentId], references: [id])
   subtasks    Task[]           @relation("Subtasks")
   assignee    User?            @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  targetDepartment Department? @relation(fields: [targetDepartmentId], references: [id])
   createdBy   User?            @relation("TaskCreator", fields: [createdById], references: [id])
   approval             TaskApproval?
   comments             TaskComment[]
@@ -596,6 +622,7 @@ model Task {
   @@index([companyId])
   @@index([projectId])
   @@index([assigneeId])
+  @@index([targetDepartmentId])
   @@index([status])
   @@index([parentId])
   @@map("task")

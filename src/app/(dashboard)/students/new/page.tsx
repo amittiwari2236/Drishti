@@ -7,7 +7,7 @@ import { StudentForm } from "@/features/students/components/student-form";
 export const metadata: Metadata = { title: "Add Student" };
 
 export default async function NewStudentPage() {
-  const user = await requireRole("SUPER_ADMIN", "COMPANY_ADMIN", "COORDINATOR");
+  const user = await requireRole("MANAGER", "MANAGER", "SENIOR");
   const scope = await companyScope(user);
 
   const [batches, companies] = await Promise.all([
@@ -16,7 +16,7 @@ export default async function NewStudentPage() {
       select: { id: true, name: true },
       orderBy: { startDate: "desc" },
     }),
-    user.role === "SUPER_ADMIN" && !scope
+    user.role === "MANAGER" && !scope
       ? prisma.company.findMany({
           where: { status: "ACTIVE" },
           select: { id: true, name: true },

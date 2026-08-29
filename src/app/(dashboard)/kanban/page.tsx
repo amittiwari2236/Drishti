@@ -29,7 +29,7 @@ export default async function KanbanPage({
   const projects = await prisma.project.findMany({
     where: {
       ...scope,
-      ...(user.role === "STUDENT"
+      ...(user.role === "INTERN"
         ? { students: { some: { userId: user.id } } }
         : {}),
     },
@@ -43,7 +43,7 @@ export default async function KanbanPage({
       parentId: null,
       deletedAt: null,
       ...(projectId ? { projectId } : {}),
-      ...(user.role === "STUDENT" ? { assigneeId: user.id } : {}),
+      ...(user.role === "INTERN" ? { assigneeId: user.id } : {}),
       OR: [
         { approval: null },
         { approval: { status: { in: ["APPROVED", "DECLINED"] } } },

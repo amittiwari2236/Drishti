@@ -33,7 +33,7 @@ import {
 export type ProjectOptions = {
   id: string;
   name: string;
-  students: { id: string; name: string }[];
+  students: { id: string; name: string; designation?: string | null }[];
   milestones: { id: string; title: string }[];
   tasks: { id: string; title: string }[];
 };
@@ -50,6 +50,8 @@ export function TaskForm({
   taskId?: string;
   parentId?: string;
   onDone?: () => void;
+  pragyaDepartments?: any[];
+  currentUser?: { id: string; role: string; designation?: string | null };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -78,6 +80,40 @@ export function TaskForm({
     () => projects.find((p) => p.id === projectId),
     [projects, projectId]
   );
+
+  const assignableStudents = useMemo(() => {
+    if (!project) return [];
+    if (!currentUser || !pragyaDepartments) return project.students;
+    
+    // Admin can assign to anyone
+    if (currentUser.role === "MANAGER") return project.students;
+
+    // Build a map of designation -> { hierarchy_level, department_id }
+    const roleMap = new Map();
+    pragyaDepartments.forEach(dept => {
+      dept.roles?.forEach((r: any) => {
+        roleMap.set(r.name, { level: r.hierarchy_level, deptId: dept.id });
+      });
+    });
+
+    const currData = currentUser.designation ? roleMap.get(currentUser.designation) : null;
+    const currLevel = currData?.level || 3;
+    const currDept = currData?.deptId;
+
+    return project.students.filter(student => {
+      const stuData = student.designation ? roleMap.get(student.designation) : null;
+      const stuLevel = stuData?.level || 3;
+      const stuDept = stuData?.deptId;
+
+      // Must be in the same department
+      if (currDept && stuDept && currDept !== stuDept) return false;
+      
+      // Current user can only assign if their level <= student's level (smaller number = higher boss)
+      if (currLevel > stuLevel) return false;
+
+      return true;
+    });
+  }, [project, currentUser, pragyaDepartments]);
 
   function onSubmit(values: TaskValues) {
     startTransition(async () => {
@@ -185,7 +221,7 @@ export function TaskForm({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Unassigned</SelectItem>
-                      {project?.students.map((s) => (
+                      {assignableStudents.map((s) => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.name}
                         </SelectItem>

@@ -23,7 +23,7 @@ export function RealtimeListener({ role, userId }: { role: string; userId: strin
       }, 500); // Debounce to prevent network abort errors on rapid toggles
     }
 
-    if (event.type === "TASK_APPROVAL_REQUESTED" && role === "SUPER_ADMIN" && event.taskId && event.task) {
+    if (event.type === "TASK_APPROVAL_REQUESTED" && role === "MANAGER" && event.taskId && event.task) {
       toast.custom((t) => (
         <div className="flex w-full flex-col gap-4 rounded-xl border border-amber-200 bg-white p-5 text-sm shadow-xl dark:border-amber-900/50 dark:bg-slate-950">
           <div className="flex items-start gap-3">
@@ -82,7 +82,7 @@ export function RealtimeListener({ role, userId }: { role: string; userId: strin
       ), { duration: 15000 });
     }
 
-    if (event.type === "PROPOSAL_APPROVAL_REQUESTED" && role === "SUPER_ADMIN" && event.taskId && event.task) {
+    if (event.type === "PROPOSAL_APPROVAL_REQUESTED" && role === "MANAGER" && event.taskId && event.task) {
       toast.custom((t) => (
         <div className="flex w-full flex-col gap-4 rounded-xl border border-blue-200 bg-white p-5 text-sm shadow-xl dark:border-blue-900/50 dark:bg-slate-950">
           <div className="flex items-start gap-3">

@@ -15,14 +15,15 @@ export function middleware(request: NextRequest) {
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const sessionCookie = getSessionCookie(request);
+  const customSessionCookie = request.cookies.get("drishti_user_id");
 
-  if (!isPublic && !sessionCookie) {
+  if (!isPublic && !sessionCookie && !customSessionCookie) {
     const url = new URL("/login", request.url);
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (pathname === "/login" && sessionCookie) {
+  if (pathname === "/login" && (sessionCookie || customSessionCookie)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

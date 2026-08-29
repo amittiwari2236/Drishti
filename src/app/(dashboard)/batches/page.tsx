@@ -36,7 +36,7 @@ export default async function BatchesPage() {
     },
   });
 
-  const canCreate = user.role !== "MENTOR";
+  const canCreate = user.role !== "EXECUTIVE";
 
   return (
     <>
