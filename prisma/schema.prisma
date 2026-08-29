@@ -386,12 +386,13 @@ model Company {
 
 model Department {
   id        String   @id @default(cuid())
-  companyId String
+  companyId String?
   name      String
+  code      String?
   color     String?
   headId    String?
 
-  company   Company  @relation(fields: [companyId], references: [id])
+  company   Company? @relation(fields: [companyId], references: [id])
   head      User?    @relation("DepartmentHead", fields: [headId], references: [id])
   users     User[]
   tasks     Task[]
