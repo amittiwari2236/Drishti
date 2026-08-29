@@ -970,14 +970,7 @@ model AcademicYear {
   @@map("academic_year")
 }
 
-model Department {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  code      String?
-  createdAt DateTime @default(now())
 
-  @@map("department")
-}
 
 model Technology {
   id        String   @id @default(cuid())
