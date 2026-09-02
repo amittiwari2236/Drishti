@@ -273,7 +273,9 @@ export default async function TaskDetailPage({
               <Separator />
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Assignee</span>
-                {task.assignee ? (
+                {task.targetDesignation ? (
+                  <span className="font-medium text-foreground">Role: {task.targetDesignation}</span>
+                ) : task.assignee ? (
                   <div className="flex items-center gap-2">
                     <UserAvatar
                       name={task.assignee.name}

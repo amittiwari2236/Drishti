@@ -40,7 +40,7 @@ export default async function TasksPage({
       ? { 
           OR: [
             { assigneeId: user.id },
-            { targetDesignation: user.designation ?? undefined }
+            ...(user.designation ? [{ targetDesignation: user.designation }] : [])
           ]
         } 
       : {}),

@@ -49,7 +49,7 @@ export default async function KanbanPage({
               {
                 OR: [
                   { assigneeId: user.id },
-                  { targetDesignation: user.designation ?? undefined }
+                  ...(user.designation ? [{ targetDesignation: user.designation }] : [])
                 ]
               }
             ]
