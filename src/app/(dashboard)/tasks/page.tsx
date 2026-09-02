@@ -36,14 +36,16 @@ export default async function TasksPage({
     deletedAt: null,
     ...(projectId ? { projectId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
-    ...(user.role === "INTERN" || user.role === "EXECUTIVE" 
-      ? { 
+    ...(user.hierarchyLevel === 1 
+      ? {} 
+      : { 
           OR: [
             { assigneeId: user.id },
-            ...(user.designation ? [{ targetDesignation: user.designation }] : [])
+            { createdById: user.id },
+            { assignee: { hierarchyLevel: { gte: user.hierarchyLevel || 4 } } }
           ]
         } 
-      : {}),
+      ),
     ...(isPendingFilter
       ? { approval: { status: "PENDING" } }
       : {

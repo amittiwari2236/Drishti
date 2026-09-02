@@ -17,33 +17,18 @@ import { fetchPragyaAPI } from "@/lib/pragya-api";
 import { taskSchema, commentSchema, type TaskValues } from "@/features/tasks/schemas";
 
 async function validateHierarchyAssignment(currentUser: any, assigneeId: string) {
-  // 1. System Admin Override: If user is a MANAGER in Drishti, they have global rights.
-  if (currentUser.role === "MANAGER") {
+  if (currentUser.hierarchyLevel === 1 || currentUser.role === "MANAGER") {
     return; // Authorized globally
   }
   
   const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
   if (!assignee) throw new Error("Assignee not found.");
 
-  const res = await fetchPragyaAPI('departments');
-  const pragyaDepartments = res?.status ? res.data : [];
-  
-  const roleMap = new Map();
-  pragyaDepartments.forEach((dept: any) => {
-    dept.roles?.forEach((r: any) => {
-      roleMap.set(r.name, r.hierarchy_level);
-    });
-  });
+  const activeLevel = currentUser.hierarchyLevel || 4;
+  const assignLevel = assignee.hierarchyLevel || 4;
 
-  // Determine current active level from Pragya identity
-  const activeLevel = currentUser.hierarchyLevel || 
-    (currentUser.designation && roleMap.has(currentUser.designation) ? roleMap.get(currentUser.designation) : 3);
-  
-  const assignLevel = assignee.designation && roleMap.has(assignee.designation) ? roleMap.get(assignee.designation) : 3;
-
-  // 2. Standard Production Rule: Junior cannot assign to Senior.
   if (activeLevel > assignLevel) {
-    throw new Error(`Forbidden: Level ${activeLevel} cannot assign tasks to Level ${assignLevel}.`);
+    throw new Error(`Hierarchy violation: Level ${activeLevel} cannot assign tasks to Level ${assignLevel}.`);
   }
 }
 
@@ -69,7 +54,6 @@ function normalize(data: TaskValues) {
     description: data.description || null,
     milestoneId: data.milestoneId || null,
     assigneeId: data.assigneeId || null,
-    targetDesignation: data.targetDesignation || null,
     status: data.status,
     priority: data.priority,
     deadline: data.deadline ? new Date(data.deadline) : null,

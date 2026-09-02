@@ -44,7 +44,6 @@ export function TaskForm({
   taskId,
   parentId,
   onDone,
-  pragyaDepartments,
   currentUser,
   allUsers,
 }: {
@@ -53,9 +52,8 @@ export function TaskForm({
   taskId?: string;
   parentId?: string;
   onDone?: () => void;
-  pragyaDepartments?: any[];
-  currentUser?: { id: string; role: string; designation?: string | null };
-  allUsers?: { id: string; name: string; designation?: string | null }[];
+  currentUser?: { id: string; role: string; designation?: string | null; hierarchyLevel?: number | null };
+  allUsers?: { id: string; name: string; designation?: string | null; hierarchyLevel?: number | null }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -90,41 +88,20 @@ export function TaskForm({
     [projects, projectId]
   );
 
-  const assignableRoles = useMemo(() => {
-    if (!pragyaDepartments) return [];
+  const assignableUsers = useMemo(() => {
+    if (!allUsers) return [];
+    if (!currentUser) return allUsers;
     
-    // Extract all roles from pragyaDepartments
-    const allRoles: { name: string; level: number }[] = [];
-    pragyaDepartments.forEach(dept => {
-      dept.roles?.forEach((r: any) => {
-        allRoles.push({ name: r.name, level: r.hierarchy_level || 3 });
-      });
+    // Admin (MANAGER or hierarchyLevel 1) can assign to anyone
+    if (currentUser.hierarchyLevel === 1 || currentUser.role === "MANAGER") return allUsers;
+
+    const currLevel = currentUser.hierarchyLevel || 4;
+
+    return allUsers.filter(u => {
+      const uLevel = u.hierarchyLevel || 4;
+      return currLevel <= uLevel;
     });
-
-    if (!currentUser) return allRoles;
-    
-    // Admin (MANAGER) can assign to anyone
-    if (currentUser.role === "MANAGER") return allRoles;
-
-    const getRoleLevel = (role?: string | null) => {
-      switch (role) {
-        case "MANAGER": return 1;
-        case "SENIOR": return 2;
-        case "EXECUTIVE": return 3;
-        case "INTERN": return 4;
-        default: return 4;
-      }
-    };
-
-    const currLevel = getRoleLevel(currentUser.role);
-
-    return allRoles.filter(role => {
-      // Map pragya hierarchy level (where 1 is highest, etc) to our strict comparison
-      // If pragya doesn't match our exact 1-4 scale, we assume currLevel must be <= role.level
-      if (currLevel > role.level) return false;
-      return true;
-    });
-  }, [currentUser, pragyaDepartments]);
+  }, [currentUser, allUsers]);
 
   function onSubmit(values: TaskValues) {
     startTransition(async () => {
@@ -221,14 +198,13 @@ export function TaskForm({
             />
             <FormField
               control={form.control}
-              name="targetDesignation"
+              name="assigneeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assign to Role</FormLabel>
+                  <FormLabel>Assign To</FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
                     value={field.value || "none"}
-                    disabled={false}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -237,9 +213,9 @@ export function TaskForm({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Unassigned</SelectItem>
-                      {assignableRoles.map((r, i) => (
-                        <SelectItem key={`${r.name}-${i}`} value={r.name}>
-                          {r.name}
+                      {assignableUsers.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name} {u.designation ? `(${u.designation})` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

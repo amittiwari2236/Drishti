@@ -599,7 +599,6 @@ model Task {
   order          Float      @default(0)
   assigneeId     String?
   targetDepartmentId String?
-  targetDesignation String?
   completedAt    DateTime?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
