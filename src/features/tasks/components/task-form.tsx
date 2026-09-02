@@ -92,37 +92,36 @@ export function TaskForm({
 
   const assignableStudents = useMemo(() => {
     const studentsToFilter = project ? project.students : (allUsers || []);
-    if (!currentUser || !pragyaDepartments) return studentsToFilter;
+    if (!currentUser) return studentsToFilter;
     
-    // Admin can assign to anyone
+    // Admin (MANAGER) can assign to anyone (Level 1, 2, 3, 4)
     if (currentUser.role === "MANAGER") return studentsToFilter;
 
-    // Build a map of designation -> { hierarchy_level, department_id }
-    const roleMap = new Map();
-    pragyaDepartments.forEach(dept => {
-      dept.roles?.forEach((r: any) => {
-        roleMap.set(r.name, { level: r.hierarchy_level, deptId: dept.id });
-      });
-    });
+    const getRoleLevel = (role?: string | null) => {
+      switch (role) {
+        case "MANAGER": return 1;
+        case "SENIOR": return 2;
+        case "EXECUTIVE": return 3;
+        case "INTERN": return 4;
+        default: return 4; // Default to lowest
+      }
+    };
 
-    const currData = currentUser.designation ? roleMap.get(currentUser.designation) : null;
-    const currLevel = currData?.level || 3;
-    const currDept = currData?.deptId;
+    const currLevel = getRoleLevel(currentUser.role);
 
     return studentsToFilter.filter(student => {
-      const stuData = student.designation ? roleMap.get(student.designation) : null;
-      const stuLevel = stuData?.level || 3;
-      const stuDept = stuData?.deptId;
+      const stuLevel = getRoleLevel(student.role);
 
-      // Removed department check to explicitly allow cross-department assignment
-      // for the same hierarchy level (or lower).
-      
-      // Current user can only assign if their level <= student's level (smaller number = higher boss)
+      // Current user can only assign tasks to users at their level or lower (higher number)
+      // Level 1 -> 1, 2, 3, 4
+      // Level 2 -> 2, 3, 4
+      // Level 3 -> 3, 4
+      // Level 4 -> 4
       if (currLevel > stuLevel) return false;
 
       return true;
     });
-  }, [project, allUsers, currentUser, pragyaDepartments]);
+  }, [project, allUsers, currentUser]);
 
   function onSubmit(values: TaskValues) {
     startTransition(async () => {

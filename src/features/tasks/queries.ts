@@ -25,7 +25,7 @@ export async function getProjectOptions(
       id: true,
       name: true,
       students: {
-        select: { user: { select: { id: true, name: true, designation: true } } },
+        select: { user: { select: { id: true, name: true, role: true, designation: true } } },
       },
       milestones: {
         where: { deletedAt: null },
@@ -44,7 +44,7 @@ export async function getProjectOptions(
   return projects.map((p) => ({
     id: p.id,
     name: p.name,
-    students: p.students.map((s) => ({ id: s.user.id, name: s.user.name, designation: s.user.designation })),
+    students: p.students.map((s) => ({ id: s.user.id, name: s.user.name, role: s.user.role, designation: s.user.designation })),
     milestones: p.milestones,
     tasks: p.tasks,
   }));
