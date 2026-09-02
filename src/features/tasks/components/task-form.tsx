@@ -193,12 +193,12 @@ export function TaskForm({
                   <FormLabel>Project</FormLabel>
                   <Select
                     onValueChange={(v) => {
-                      field.onChange(v);
+                      field.onChange(v === "none" ? "" : v);
                       form.setValue("assigneeId", "");
                       form.setValue("milestoneId", "");
                       form.setValue("dependencyIds", []);
                     }}
-                    value={field.value}
+                    value={field.value || "none"}
                     disabled={!!taskId || !!parentId}
                   >
                     <FormControl>
