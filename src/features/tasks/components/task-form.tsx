@@ -46,6 +46,7 @@ export function TaskForm({
   onDone,
   pragyaDepartments,
   currentUser,
+  allUsers,
 }: {
   projects: ProjectOptions[];
   initial?: TaskValues;
