@@ -287,15 +287,7 @@ export default async function TaskDetailPage({
                     : "—"}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="size-3.5" /> Hours
-                </span>
-                <span>
-                  {task.actualHours ?? 0}
-                  {task.estimatedHours ? ` / ${task.estimatedHours}` : ""} h
-                </span>
-              </div>
+
             </CardContent>
           </Card>
 

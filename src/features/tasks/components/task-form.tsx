@@ -76,8 +76,7 @@ export function TaskForm({
       status: "PENDING",
       priority: "MEDIUM",
       deadline: "",
-      estimatedHours: null,
-      actualHours: null,
+
       dependencyIds: [],
     },
   });
@@ -285,52 +284,7 @@ export function TaskForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="estimatedHours"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estimated hours</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? null : Number(e.target.value)
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="actualHours"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Actual hours</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? null : Number(e.target.value)
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             {project && project.milestones.length > 0 && (
               <FormField
                 control={form.control}

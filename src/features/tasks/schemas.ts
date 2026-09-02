@@ -17,8 +17,7 @@ export const taskSchema = z.object({
   status: z.enum(TASK_STATUSES),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   deadline: z.string().optional().or(z.literal("")),
-  estimatedHours: z.coerce.number().min(0).max(1000).optional().nullable(),
-  actualHours: z.coerce.number().min(0).max(1000).optional().nullable(),
+
   dependencyIds: z.array(z.string()).max(20).optional(),
 });
 

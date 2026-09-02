@@ -54,8 +54,7 @@ export default async function EditTaskPage({
     status: task.status,
     priority: task.priority,
     deadline: task.deadline?.toISOString().slice(0, 10) ?? "",
-    estimatedHours: task.estimatedHours ?? null,
-    actualHours: task.actualHours ?? null,
+
     dependencyIds: task.dependencies.map((d) => d.dependsOnId),
   };
 

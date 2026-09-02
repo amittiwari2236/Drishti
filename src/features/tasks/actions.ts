@@ -56,8 +56,6 @@ function normalize(data: TaskValues) {
     status: data.status,
     priority: data.priority,
     deadline: data.deadline ? new Date(data.deadline) : null,
-    estimatedHours: data.estimatedHours ?? null,
-    actualHours: data.actualHours ?? null,
   };
 }
 
