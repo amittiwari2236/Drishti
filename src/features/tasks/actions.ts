@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import {
   requireUser,
   assertCompanyAccess,
+  resolveCompanyForWrite,
 } from "@/lib/access";
 import { can } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
@@ -82,7 +83,14 @@ export async function createTask(values: TaskValues) {
   const data = taskSchema.parse(values);
 
   let project = null;
-  let companyId = user.companyId;
+  let companyId = await resolveCompanyForWrite(user).catch(() => user.companyId);
+
+  // If even resolveCompanyForWrite fails (e.g. general MANAGER task with 'All Companies'), fallback to assignee's company or empty string.
+  if (!companyId && data.assigneeId) {
+    const assignee = await prisma.user.findUnique({ where: { id: data.assigneeId }});
+    companyId = assignee?.companyId ?? "";
+  }
+  companyId = companyId || "";
 
   if (data.projectId) {
     project = await prisma.project.findUnique({
@@ -97,12 +105,17 @@ export async function createTask(values: TaskValues) {
     const assignee = await prisma.user.findUnique({
       where: { id: data.assigneeId },
     });
-    if (!assignee || assignee.companyId !== companyId) {
+    // If the assignee has no companyId (e.g. they are an admin) and companyId is also missing/empty, it's fine temporarily if we catch it below.
+    if (!assignee || (assignee.companyId && companyId && assignee.companyId !== companyId)) {
       throw new Error("Assignee does not belong to this company.");
     }
     
     // Strict backend enforcement of assignment hierarchy
     await validateHierarchyAssignment(user, data.assigneeId);
+  }
+
+  if (!companyId) {
+    throw new Error("Unable to determine company for this task. Please select a company from the switcher, assign a project, or select a non-admin assignee.");
   }
 
   const maxOrder = await prisma.task.aggregate({
