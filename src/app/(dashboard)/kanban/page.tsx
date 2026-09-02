@@ -75,8 +75,8 @@ export default async function KanbanPage({
     order: t.order,
     deadline: t.deadline?.toISOString() ?? null,
     approvalStatus: t.approval?.status ?? null,
-    projectName: t.project.name,
-    projectId: t.project.id,
+    projectName: t.project?.name ?? "General Task",
+    projectId: t.project?.id ?? "",
     assignee: t.assignee
       ? {
           id: t.assignee.id,

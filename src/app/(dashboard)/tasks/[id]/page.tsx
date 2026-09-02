@@ -141,10 +141,10 @@ export default async function TaskDetailPage({
           <>
             in{" "}
             <Link
-              href={`/projects/${task.project.id}`}
-              className="font-medium text-foreground hover:underline"
+              href={task.projectId ? `/projects/${task.projectId}` : "#"}
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {task.project.name}
+              {task.project?.name ?? "General Task"}
             </Link>
           </>
         }

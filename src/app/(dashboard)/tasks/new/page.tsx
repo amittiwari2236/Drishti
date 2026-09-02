@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { requireUser } from "@/lib/access";
+import { requireUser, companyFilter } from "@/lib/access";
 import { can } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FolderKanban } from "lucide-react";
@@ -20,6 +21,13 @@ export default async function NewTaskPage() {
   }
 
   const projects = await getProjectOptions(user);
+  const scope = await companyFilter(user);
+  const allUsers = await prisma.user.findMany({
+    where: { ...scope, deletedAt: null, isActive: true },
+    select: { id: true, name: true, designation: true },
+    orderBy: { name: 'asc' }
+  });
+
   const token = (await cookies()).get('pragya_jwt')?.value;
 
   let pragyaDepartments = [];
@@ -46,19 +54,12 @@ export default async function NewTaskPage() {
         title="New task"
         description="Create a task, assign it to a student, and set a deadline."
       />
-      {projects.length === 0 ? (
-        <EmptyState
-          icon={FolderKanban}
-          title="No projects yet"
-          description="Create a project before adding tasks to it."
-        />
-      ) : (
-        <TaskForm 
-          projects={projects} 
-          pragyaDepartments={pragyaDepartments}
-          currentUser={{ id: user.id, role: user.role, designation: user.designation }}
-        />
-      )}
+      <TaskForm 
+        projects={projects} 
+        pragyaDepartments={pragyaDepartments}
+        currentUser={{ id: user.id, role: user.role, designation: user.designation }}
+        allUsers={allUsers}
+      />
     </div>
   );
 }

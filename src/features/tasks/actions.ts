@@ -96,17 +96,23 @@ export async function createTask(values: TaskValues) {
   }
   const data = taskSchema.parse(values);
 
-  const project = await prisma.project.findUnique({
-    where: { id: data.projectId },
-  });
-  if (!project) throw new Error("Project not found");
-  assertCompanyAccess(user, project.companyId);
+  let project = null;
+  let companyId = user.companyId;
+
+  if (data.projectId) {
+    project = await prisma.project.findUnique({
+      where: { id: data.projectId },
+    });
+    if (!project) throw new Error("Project not found");
+    assertCompanyAccess(user, project.companyId);
+    companyId = project.companyId;
+  }
 
   if (data.assigneeId) {
     const assignee = await prisma.user.findUnique({
       where: { id: data.assigneeId },
     });
-    if (!assignee || assignee.companyId !== project.companyId) {
+    if (!assignee || assignee.companyId !== companyId) {
       throw new Error("Assignee does not belong to this company.");
     }
     
@@ -115,7 +121,11 @@ export async function createTask(values: TaskValues) {
   }
 
   const maxOrder = await prisma.task.aggregate({
-    where: { projectId: data.projectId, status: data.status },
+    where: { 
+      companyId: companyId,
+      ...(data.projectId ? { projectId: data.projectId } : { projectId: null }),
+      status: data.status 
+    },
     _max: { order: true },
   });
 
@@ -124,8 +134,8 @@ export async function createTask(values: TaskValues) {
   const task = await prisma.task.create({
     data: {
       ...normalize(data),
-      companyId: project.companyId,
-      projectId: data.projectId,
+      companyId: companyId,
+      projectId: data.projectId || null,
       parentId: data.parentId || null,
       order: (maxOrder._max.order ?? 0) + 1,
       createdById: user.id,
@@ -148,7 +158,7 @@ export async function createTask(values: TaskValues) {
 
   await logActivity({
     userId: user.id,
-    companyId: project.companyId,
+    companyId: companyId,
     action: "CREATE",
     entityType: "Task",
     entityId: task.id,
@@ -166,7 +176,7 @@ export async function createTask(values: TaskValues) {
         userId: task.assigneeId,
         type: "TASK_ASSIGNED",
         title: "New task assigned",
-        message: `You were assigned "${task.title}" in ${project.name}.`,
+        message: `You were assigned "${task.title}"${project ? ` in ${project.name}` : ""}.`,
         link: `/tasks/${task.id}`,
       });
     }
@@ -186,8 +196,8 @@ export async function createTask(values: TaskValues) {
         priority: task.priority,
         order: task.order,
         deadline: task.deadline?.toISOString() ?? null,
-        projectName: project.name,
-        projectId: project.id,
+        projectName: project?.name ?? "General Task",
+        projectId: project?.id ?? "",
         assignee: data.assigneeId
           ? {
               id: data.assigneeId,
@@ -616,7 +626,7 @@ export async function approveTask(taskId: string) {
       userId: task.assigneeId,
       type: "TASK_ASSIGNED",
       title: "New task assigned",
-      message: `You were assigned "${task.title}" in ${task.project.name} (Approved).`,
+      message: `You were assigned "${task.title}"${task.project ? ` in ${task.project.name}` : ""} (Approved).`,
       link: `/tasks/${task.id}`,
     });
   }

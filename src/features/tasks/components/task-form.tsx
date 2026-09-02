@@ -54,6 +54,7 @@ export function TaskForm({
   onDone?: () => void;
   pragyaDepartments?: any[];
   currentUser?: { id: string; role: string; designation?: string | null };
+  allUsers?: { id: string; name: string; designation?: string | null }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -69,7 +70,7 @@ export function TaskForm({
     defaultValues: initial ?? {
       title: "",
       description: "",
-      projectId: projects.length === 1 ? projects[0].id : "",
+      projectId: "",
       parentId: parentId ?? "",
       milestoneId: "",
       assigneeId: "",
@@ -89,11 +90,11 @@ export function TaskForm({
   );
 
   const assignableStudents = useMemo(() => {
-    if (!project) return [];
-    if (!currentUser || !pragyaDepartments) return project.students;
+    const studentsToFilter = project ? project.students : (allUsers || []);
+    if (!currentUser || !pragyaDepartments) return studentsToFilter;
     
     // Admin can assign to anyone
-    if (currentUser.role === "MANAGER") return project.students;
+    if (currentUser.role === "MANAGER") return studentsToFilter;
 
     // Build a map of designation -> { hierarchy_level, department_id }
     const roleMap = new Map();
@@ -107,7 +108,7 @@ export function TaskForm({
     const currLevel = currData?.level || 3;
     const currDept = currData?.deptId;
 
-    return project.students.filter(student => {
+    return studentsToFilter.filter(student => {
       const stuData = student.designation ? roleMap.get(student.designation) : null;
       const stuLevel = stuData?.level || 3;
       const stuDept = stuData?.deptId;
@@ -120,7 +121,7 @@ export function TaskForm({
 
       return true;
     });
-  }, [project, currentUser, pragyaDepartments]);
+  }, [project, allUsers, currentUser, pragyaDepartments]);
 
   function onSubmit(values: TaskValues) {
     startTransition(async () => {
@@ -186,7 +187,7 @@ export function TaskForm({
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project *</FormLabel>
+                  <FormLabel>Project</FormLabel>
                   <Select
                     onValueChange={(v) => {
                       field.onChange(v);
@@ -203,6 +204,7 @@ export function TaskForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="none">None / General Task</SelectItem>
                       {projects.map((p) => (
                         <SelectItem key={p.id} value={p.id}>
                           {p.name}
@@ -223,7 +225,7 @@ export function TaskForm({
                   <Select
                     onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
                     value={field.value || "none"}
-                    disabled={!project}
+                    disabled={false}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">

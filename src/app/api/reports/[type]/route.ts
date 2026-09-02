@@ -100,7 +100,7 @@ export async function GET(
     tasks.forEach((t) => {
       ws.addRow({
         title: t.title,
-        project: t.project.name,
+        project: t.project?.name ?? "General Task",
         assignee: t.assignee?.name ?? "Unassigned",
         status: TASK_STATUS_LABELS[t.status],
         priority: t.priority,

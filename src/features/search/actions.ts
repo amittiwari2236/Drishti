@@ -109,7 +109,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
     tasks: tasks.map((t) => ({
       id: t.id,
       label: t.title,
-      sublabel: t.project.name,
+      sublabel: t.project?.name ?? "General Task",
       href: `/tasks/${t.id}`,
     })),
     companies: companies.map((c) => ({
