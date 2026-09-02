@@ -26,8 +26,4 @@ services:
         generateValue: true
       - key: CRON_SECRET
         generateValue: true
-      # Replace with your final Render onrender.com URL
-      - key: BETTER_AUTH_URL
-        sync: false
-      - key: NEXT_PUBLIC_APP_URL
-        sync: false
+
