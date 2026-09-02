@@ -10,8 +10,7 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install && npm run build
-    preDeployCommand: npx prisma migrate deploy
-    startCommand: npm run start
+    startCommand: npx prisma migrate deploy && npm run start
     envVars:
       - key: NODE_ENV
         value: production
