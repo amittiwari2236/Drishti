@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { requireUser, assertCompanyAccess } from "@/lib/access";
 import { can } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";

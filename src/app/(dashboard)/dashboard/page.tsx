@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Department, User } from "@prisma/client";
 import Link from "next/link";
 import {
   Building2,
@@ -62,6 +63,7 @@ export default async function DashboardPage() {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
+  const hasDashboardAccess = can(user, "feature:dashboard");
   const hasCompaniesAccess = can(user, "feature:companies");
   const hasStudentsAccess = can(user, "feature:students");
   const hasProjectsAccess = can(user, "feature:projects");
@@ -72,7 +74,7 @@ export default async function DashboardPage() {
   const hasProposalsAccess = can(user, "feature:propose");
   const hasAnalyticsAccess = can(user, "feature:analytics");
   const hasCalendarAccess = can(user, "feature:calendar");
-  const hasPermissionsAccess = can(user, "feature:permissions") || user.role === "MANAGER";
+  const hasPermissionsAccess = can(user, "feature:permissions");
 
   const [companies, students, projects, batches, openTasks, reportsToday] =
     await Promise.all([
@@ -105,53 +107,19 @@ export default async function DashboardPage() {
     ]);
 
   // ROLE-BASED DASHBOARD DATA FETCHING (Realistic replacement of client HTML dummy data)
-  const isAdmin = user.role === "MANAGER";
-  const isLead = user.role === "SENIOR" || user.role === "EXECUTIVE";
-  // Fallback to member if not admin or lead
+  // Evaluate real hierarchy level 
+  const activeHierarchy = user.hierarchyLevel || 
+    (user.role === "MANAGER" ? 1 : user.role === "SENIOR" ? 2 : user.role === "EXECUTIVE" ? 3 : 4);
+
+  const isAdmin = activeHierarchy === 1;
+  const isLead = activeHierarchy === 2;
+  // Fallback to member if not admin or lead (Level 3 or 4)
 
   let localDepartments: (Department & { _count: { tasks: number } })[] = [];
   let roleProjects: any[] = [];
   let roleTasks: any[] = [];
   let teamMembers: User[] = [];
-  let pragyaDepartments: any[] = [];
-  let pragyaStats: any = null;
-  let pragyaSchedule: any[] = [];
-
   const token = (await cookies()).get('pragya_jwt')?.value;
-
-  try {
-    if (token === "DUMMY_TOKEN_FOR_DEMO") {
-      // Provide completely offline mock data for dummy accounts for instant login
-      pragyaDepartments = [
-        { id: 1, name: 'Technology', code: 'TECH', roles: [{id: 1, name: 'Developer', hierarchy_level: 3}, {id: 2, name: 'Tech Lead', hierarchy_level: 2}] },
-        { id: 2, name: 'Finance', code: 'FIN', roles: [] },
-        { id: 5, name: 'Teaching', code: 'TEACHING', roles: [{id: 3, name: 'Instructor', hierarchy_level: 3}] }
-      ];
-      pragyaStats = { total_classes: 42, total_hours: 128 };
-      pragyaSchedule = [
-        { title: "Yoga Basics", date: "Tomorrow, 10:00 AM", room: "Studio A" },
-        { title: "Advanced Meditation", date: "Friday, 06:00 PM", room: "Studio B" },
-        { title: "Teacher Training", date: "Saturday, 08:00 AM", room: "Main Hall" }
-      ];
-    } else {
-      // Fetch concurrently to avoid long loading times
-      const apiPromises = [fetchPragyaAPI('departments')];
-      if (token) {
-        apiPromises.push(fetchPragyaAPI('stats', token));
-        apiPromises.push(fetchPragyaAPI('schedule', token));
-      }
-
-      const results = await Promise.all(apiPromises);
-      pragyaDepartments = results[0]?.status ? results[0].data : [];
-      
-      if (token) {
-        pragyaStats = results[1]?.status ? results[1].data : null;
-        pragyaSchedule = results[2]?.status ? results[2].data : [];
-      }
-    }
-  } catch (e) {
-    console.error("Failed to fetch from Pragya API", e);
-  }
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
@@ -160,9 +128,8 @@ export default async function DashboardPage() {
     : null;
 
 
-  const allPragyaRoles = pragyaDepartments.flatMap((d: any) => d.roles?.map((r: any) => r.name) || []);
   const defaultRoles = ["Tech Lead", "Finance Manager", "Event Manager", "Instructor", "Front Desk Lead"];
-  const pragyaRoleNames = allPragyaRoles.length > 0 ? allPragyaRoles : defaultRoles;
+  const pragyaRoleNames = defaultRoles;
 
   // Give the logged in user a Pragya role based on their ID length or randomly
   const userPragyaRole = pragyaRoleNames[user.id.length % pragyaRoleNames.length];
@@ -420,31 +387,58 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Role-Based Dashboard Views (Pragya Flow Concepts) ────────── */}
-      {isAdmin ? (
-        <AdminDashboardView 
-          projects={roleProjects} 
-          tasks={roleTasks} 
-          departments={localDepartments} 
-          pragyaDepartments={pragyaDepartments}
-          pragyaStats={pragyaStats}
-          pragyaSchedule={pragyaSchedule}
-        />
-      ) : isLead ? (
-        <LeadDashboardView 
-          user={{ id: user.id, name: user.name, role: userPragyaRole }}
-          projects={roleProjects}
-          tasks={roleTasks}
-          teamMembers={teamMembers}
-          pragyaStats={pragyaStats}
-          pragyaSchedule={pragyaSchedule}
-        />
+      {hasDashboardAccess ? (
+        isAdmin ? (
+          <AdminDashboardView 
+            projects={roleProjects} 
+            tasks={roleTasks} 
+            token={token}
+            currentUser={user}
+          />
+        ) : isLead ? (
+          <LeadDashboardView 
+            user={{ id: user.id, name: user.name, role: userPragyaRole }}
+            projects={roleProjects}
+            tasks={roleTasks}
+            teamMembers={teamMembers}
+            token={token}
+            currentUser={user}
+          />
+        ) : (
+          <MemberDashboardView 
+            user={{ id: user.id, name: user.name, role: userPragyaRole }}
+            projects={roleProjects}
+            tasks={roleTasks}
+            token={token}
+            currentUser={user}
+          />
+        )
       ) : (
-        <MemberDashboardView 
-          projects={roleProjects}
-          tasks={roleTasks}
-          pragyaStats={pragyaStats}
-          pragyaSchedule={pragyaSchedule}
-        />
+        <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-indigo-50/50 via-white to-slate-50/50 dark:from-slate-900/50 dark:via-background dark:to-indigo-950/20">
+          <CardContent className="flex flex-col items-center justify-center p-16 text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 rounded-full bg-indigo-100 dark:bg-indigo-900/30 blur-xl scale-150 animate-pulse" />
+              <div className="relative flex size-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white shadow-xl shadow-indigo-200 dark:shadow-none ring-4 ring-white dark:ring-slate-900">
+                <ShieldCheck className="size-10" />
+              </div>
+            </div>
+            
+            <h2 className="mb-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              Welcome to Your Workspace
+            </h2>
+            
+            <div className="mb-8 max-w-md text-slate-500 dark:text-slate-400">
+              <p className="mb-2">Hello, <span className="font-semibold text-slate-700 dark:text-slate-300">{user.name}</span>!</p>
+              <p>Your workspace is currently being prepared. The administrator is configuring your role and access permissions.</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <Button variant="outline" className="rounded-full shadow-sm" asChild>
+                <Link href="/profile">View Profile</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* ── Student Daily Timeline Widget ────────────────────────────────── */}

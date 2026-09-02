@@ -16,6 +16,11 @@ export type SessionUser = {
   image?: string | null;
   role: Role;
   companyId: string | null;
+  departmentId: string | null;
+  hierarchyLevel: number | null;
+  designation?: string | null; // Track current active designation
+  activeRoleName?: string | null; // The exact name of the active context sub-role
+  activeRoleId?: string | null; // The dynamic ID of the active role from the API
 };
 
 /** Cached per-request session lookup with PostgreSQL authoritative verification. */
@@ -38,6 +43,9 @@ export const getSession = cache(async () => {
       role: true,
       companyId: true,
       isActive: true,
+      departmentId: true,
+      hierarchyLevel: true,
+      designation: true,
     },
   });
 
@@ -53,6 +61,9 @@ export const getSession = cache(async () => {
         role: true,
         companyId: true,
         isActive: true,
+        departmentId: true,
+        hierarchyLevel: true,
+        designation: true,
       },
     });
   }
@@ -69,7 +80,36 @@ export const getSession = cache(async () => {
     image: dbUser.image,
     role: dbUser.role,
     companyId: dbUser.companyId,
+    departmentId: dbUser.departmentId,
+    hierarchyLevel: dbUser.hierarchyLevel,
+    designation: dbUser.designation,
   };
+
+  // ── Apply Application-Level Context Override ──
+  // If the user has switched their role context in the sidebar, override the session user properties.
+  const activeRoleCookie = (await cookies()).get("drishti_active_role")?.value;
+  if (activeRoleCookie) {
+    try {
+      const parsedContext = JSON.parse(activeRoleCookie);
+      
+      // Override properties
+      user.hierarchyLevel = parsedContext.hierarchyLevel;
+      user.departmentId = parsedContext.departmentId ? String(parsedContext.departmentId) : null;
+      user.activeRoleName = parsedContext.roleName;
+      user.designation = parsedContext.roleName;
+      user.activeRoleId = parsedContext.roleId ? String(parsedContext.roleId) : null;
+
+      // Map the active hierarchy level to a base Prisma Role for strict permission matching
+      if (parsedContext.hierarchyLevel === 1) user.role = "MANAGER";
+      else if (parsedContext.hierarchyLevel === 2) user.role = "SENIOR";
+      else if (parsedContext.hierarchyLevel === 3) user.role = "EXECUTIVE";
+      else if (parsedContext.hierarchyLevel === 4) user.role = "INTERN";
+      
+    } catch (err) {
+      console.error("Failed to parse drishti_active_role cookie", err);
+    }
+  }
+
   return { user, session: session?.session || {} as any };
 });
 

@@ -1,0 +1,1 @@
+async function testApi(action) { const f = new FormData(); f.append('action', action); const res = await fetch('https://pragya-yog.com/api_teacher.php', { method: 'POST', body: f }); const data = await res.json(); console.log('\n=== ACTION: ' + action + ' ==='); console.log(JSON.stringify(data, null, 2).substring(0, 300)); } (async () => { await testApi('staff-members'); })();

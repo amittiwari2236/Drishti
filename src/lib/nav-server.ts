@@ -2,7 +2,7 @@ import type { Role } from "@prisma/client";
 import { can } from "@/lib/permissions";
 import { NAV_GROUPS, type NavGroup } from "@/config/nav";
 
-export function navForRole(userOrRole: Role | { role: Role; id?: string }): NavGroup[] {
+export function navForRole(userOrRole: Role | { role: Role; id?: string; activeRoleId?: string | null }): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
@@ -18,7 +18,7 @@ export function navForRole(userOrRole: Role | { role: Role; id?: string }): NavG
   })).filter((group) => group.items.length > 0);
 }
 
-export function getAllowedHrefs(userOrRole: Role | { role: Role; id?: string }): string[] {
+export function getAllowedHrefs(userOrRole: Role | { role: Role; id?: string; activeRoleId?: string | null }): string[] {
   const allowed: string[] = [];
   for (const group of NAV_GROUPS) {
     for (const item of group.items) {

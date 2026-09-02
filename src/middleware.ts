@@ -10,6 +10,8 @@ export function middleware(request: NextRequest) {
     const url = new URL("/login", request.url);
     const response = NextResponse.redirect(url);
     response.cookies.delete("better-auth.session_token");
+    response.cookies.delete("drishti_user_id");
+    response.cookies.delete("drishti_active_role");
     return response;
   }
 
@@ -24,7 +26,10 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === "/login" && (sessionCookie || customSessionCookie)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    // Do not redirect Server Actions
+    if (!request.headers.has("next-action")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
   return NextResponse.next();

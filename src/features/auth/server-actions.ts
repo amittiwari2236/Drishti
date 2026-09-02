@@ -2,117 +2,146 @@
 
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { fetchPragyaAPI } from "@/lib/pragya-api";
-import { v4 as uuidv4 } from "uuid";
 
 export async function loginWithPragya(email: string, passwordHash: string) {
-  // --- BYPASS FOR DUMMY ACCOUNTS ---
-  if (email.endsWith("@example.com")) {
-    const dbUser = await prisma.user.findUnique({ where: { email } });
-    if (!dbUser) {
-      return { error: "Dummy account not found in database." };
-    }
-    
-    // Create Custom Session manually
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const cookieStore = await cookies();
+  // Bypassed Pragya API completely as requested.
+  return { error: "API Login is currently disabled. Please use the Demo Login options." };
+}
 
+export async function mockSuperAdminLogin() {
+  try {
+    const cookieStore = await cookies();
+    const email = "admin@example.com";
+    
+    let dbUser = await prisma.user.findUnique({ where: { email } });
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          email,
+          name: "System Administrator",
+          phone: "0000000000",
+          designation: "Chief System Administrator & Super Admin",
+          departmentId: null,
+          hierarchyLevel: 1,
+          role: "MANAGER",
+        }
+      });
+    } else {
+      dbUser = await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { hierarchyLevel: 1, role: "MANAGER" }
+      });
+    }
+
+    // Set user ID cookie
     cookieStore.set("drishti_user_id", dbUser.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      expires: expiresAt,
+      maxAge: 7 * 24 * 60 * 60,
     });
+
+    // Ensure they are NOT acting as any sub-role
+    cookieStore.delete("drishti_active_role");
+
+    return { success: true, user: { name: dbUser.name, role: dbUser.role } };
+  } catch (error: any) {
+    console.error("mockSuperAdminLogin error:", error);
+    return { error: error.message || "An error occurred during super admin login" };
+  }
+}
+
+export async function mockRoleLogin(context: {
+  roleId: number | string;
+  roleName: string;
+  hierarchyLevel: number;
+  departmentId: string | number;
+  isSubRole: boolean;
+}) {
+  try {
+    const cookieStore = await cookies();
+    const email = "demo-teacher@example.com";
     
-    // Set a dummy pragya token so dashboard knows it's a local demo
-    cookieStore.set("pragya_jwt", "DUMMY_TOKEN_FOR_DEMO", { path: "/" });
+    let dbUser = await prisma.user.findUnique({ where: { email } });
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          email,
+          name: context.roleName || "Demo User",
+          phone: "1111111111",
+          designation: context.roleName || "Demo Staff Member",
+          departmentId: null,
+          hierarchyLevel: 3,
+          role: "EXECUTIVE", // Strictly a teacher/staff role, not a MANAGER
+        }
+      });
+    } else {
+      // Ensure they don't have MANAGER role and update name
+      dbUser = await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { 
+          name: context.roleName || "Demo User",
+          designation: context.roleName || "Demo Staff Member",
+          hierarchyLevel: 3, 
+          role: "EXECUTIVE" 
+        }
+      });
+    }
 
-    return { success: true };
+    // Set user ID cookie
+    cookieStore.set("drishti_user_id", dbUser.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    // Actively set their role context so permissions apply
+    cookieStore.set("drishti_active_role", JSON.stringify(context), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return { success: true, user: { name: dbUser.name, role: dbUser.role } };
+  } catch (error: any) {
+    console.error("mockRoleLogin error:", error);
+    return { error: error.message || "An error occurred during role login" };
   }
-  // ---------------------------------
+}
 
-  // 1. Call Pragya API Login
-  const res = await fetchPragyaAPI("login", undefined, { email, password: passwordHash });
-  
-  if (!res.status) {
-    return { error: res.message || "Invalid credentials" };
-  }
-
-  // 2. Extract Token and Profile
-  const token = res.access_token || res.data?.access_token || res.token || res.data?.token;
-  if (!token) {
-    return { error: "Login succeeded but no token received from API" };
-  }
-
-  // 3. Save Pragya JWT to cookies
+export async function logoutWithPragya() {
   const cookieStore = await cookies();
-  cookieStore.set("pragya_jwt", token, {
+  cookieStore.delete("pragya_jwt");
+  cookieStore.delete("drishti_user_id");
+  cookieStore.delete("drishti_active_role");
+  return { success: true };
+}
+
+export async function switchActiveRoleContext(context: {
+  roleId: number | string;
+  roleName: string;
+  hierarchyLevel: number;
+  departmentId: string | number;
+  isSubRole: boolean;
+}) {
+  const cookieStore = await cookies();
+  cookieStore.set("drishti_active_role", JSON.stringify(context), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   });
+  return { success: true };
+}
 
-  // 4. Sync User to Prisma
-  // We need to fetch profile and role concurrently
-  const [profileRes, roleRes] = await Promise.all([
-    fetchPragyaAPI("get-profile", token),
-    fetchPragyaAPI("my-role", token)
-  ]);
-
-  let name = email.split('@')[0];
-  let phone = null;
-  
-  if (profileRes.status && profileRes.data) {
-    name = profileRes.data.name || profileRes.data.username || name;
-    phone = profileRes.data.mobile || profileRes.data.phone || null;
-  }
-
-  let role = "INTERN";
-  let designation = "Staff";
-  let departmentId = null;
-
-  if (roleRes.status && roleRes.data) {
-    const rData = roleRes.data;
-    designation = rData.role || rData.name || "Staff";
-    departmentId = rData.department_id ? String(rData.department_id) : null;
-    const level = rData.hierarchy_level || 3;
-    
-    if (level === 1) role = "MANAGER";
-    else if (level === 2) role = "SENIOR";
-    else if (level === 3) role = "EXECUTIVE";
-  }
-
-  let dbUser = await prisma.user.findUnique({ where: { email } });
-  
-  if (!dbUser) {
-    dbUser = await prisma.user.create({
-      data: {
-        email,
-        name,
-        phone,
-        designation,
-        role: role as any,
-      }
-    });
-  } else {
-    // Update existing user with latest role from API
-    dbUser = await prisma.user.update({
-      where: { id: dbUser.id },
-      data: { name, phone, designation, role: role as any }
-    });
-  }
-
-  // 5. Create Custom Session since Better Auth hashes session tokens
-  cookieStore.set("drishti_user_id", dbUser.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-  });
-
+export async function clearActiveRoleContext() {
+  const cookieStore = await cookies();
+  cookieStore.delete("drishti_active_role");
   return { success: true };
 }

@@ -5,8 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { AlertTriangle, ListTodo, Users, Building, Activity, Plus, ClipboardList } from "lucide-react";
+import { AlertTriangle, ListTodo, Users, Building, Activity, Plus, ClipboardList, ChevronDown, ChevronUp, Code } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { fetchPragyaAPI } from "@/lib/pragya-api";
+import { formatTime, formatMinutes } from "@/lib/utils";
 
 type PopulatedTask = Task & { assignee: User | null };
 type PopulatedProject = Project & { tasks: Task[] };
@@ -14,17 +17,13 @@ type PopulatedProject = Project & { tasks: Task[] };
 export function AdminDashboardView({ 
   projects, 
   tasks, 
-  departments, 
-  pragyaDepartments,
-  pragyaStats,
-  pragyaSchedule
+  token,
+  currentUser
 }: { 
   projects: PopulatedProject[], 
   tasks: PopulatedTask[], 
-  departments: (Department & { _count: { tasks: number } })[],
-  pragyaDepartments: any[],
-  pragyaStats?: any,
-  pragyaSchedule?: any[]
+  token: string | undefined,
+  currentUser?: any
 }) {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === "COMPLETED").length;
@@ -42,28 +41,7 @@ export function AdminDashboardView({
         </CardContent>
       </Card>
 
-      {pragyaDepartments && pragyaDepartments.length > 0 && (
-        <Card className="border-emerald-200 dark:border-emerald-900/50">
-          <CardHeader className="pb-3 border-b mb-3 border-emerald-100 dark:border-emerald-900/50">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Activity className="size-5 text-emerald-500" />
-              Departments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {pragyaDepartments.map((d: any) => (
-                <div key={d.id} className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-3 text-center border border-emerald-100 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
-                  <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 truncate">{d.name}</div>
-                  <div className="text-xs text-emerald-600/70 dark:text-emerald-500 mt-1 font-mono">{d.code}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <PragyaStatsView stats={pragyaStats} schedule={pragyaSchedule} />
+      <PragyaLiveIntegration token={token} currentUser={currentUser} />
       <ProjectListView projects={projects} />
       <TaskListView tasks={tasks} showAssignButton={true} />
     </div>
@@ -75,15 +53,15 @@ export function LeadDashboardView({
   projects, 
   tasks,
   teamMembers,
-  pragyaStats,
-  pragyaSchedule
+  token,
+  currentUser
 }: { 
   user: { name: string; role: string; id: string },
   projects: PopulatedProject[], 
   tasks: PopulatedTask[],
   teamMembers: User[],
-  pragyaStats?: any,
-  pragyaSchedule?: any[]
+  token: string | undefined,
+  currentUser?: any
 }) {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === "COMPLETED").length;
@@ -138,7 +116,7 @@ export function LeadDashboardView({
         </CardContent>
       </Card>
 
-      <PragyaStatsView stats={pragyaStats} schedule={pragyaSchedule} />
+      <PragyaLiveIntegration token={token} currentUser={currentUser} />
       <ProjectListView projects={projects} />
       <TaskListView tasks={tasks} showAssignButton={true} />
     </div>
@@ -149,14 +127,14 @@ export function MemberDashboardView({
   user,
   projects, 
   tasks,
-  pragyaStats,
-  pragyaSchedule
+  token,
+  currentUser
 }: { 
   user: { name: string; role: string; id: string },
   projects: PopulatedProject[], 
   tasks: PopulatedTask[],
-  pragyaStats?: any,
-  pragyaSchedule?: any[]
+  token: string | undefined,
+  currentUser?: any
 }) {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === "COMPLETED").length;
@@ -174,7 +152,7 @@ export function MemberDashboardView({
         </CardContent>
       </Card>
 
-      <PragyaStatsView stats={pragyaStats} schedule={pragyaSchedule} />
+      <PragyaLiveIntegration token={token} currentUser={currentUser} />
       <ProjectListView projects={projects} />
       <TaskListView tasks={tasks} showAssignButton={false} />
     </div>
@@ -381,4 +359,263 @@ export function PragyaStatsView({ stats, schedule }: { stats?: any, schedule?: a
       )}
     </div>
   );
+}
+
+const RoleHierarchyNode = ({ role, allRoles, allStaff, depth = 0, currentUser }: { role: any, allRoles: any[], allStaff: any[], depth?: number, currentUser?: any }) => {
+  const children = allRoles.filter(r => r.parent_role_id === role.id);
+  const myStaff = allStaff.filter(s => s.role_name === role.name || s.role_name === role.role);
+  
+  const hasOverride = currentUser?.role === "MANAGER";
+  const myLevel = currentUser?.hierarchyLevel || 4;
+  
+  return (
+    <div className="flex flex-col">
+      <div 
+        className="p-3 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors flex flex-col gap-2 border-l-2"
+        style={{ 
+          marginLeft: `${depth * 16}px`, 
+          borderLeftColor: depth === 0 ? 'transparent' : '#e2e8f0',
+          marginTop: depth > 0 ? '4px' : '0'
+        }}
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            {depth > 0 && <span className="text-slate-300 font-mono">└─</span>}
+            <span className="font-medium text-sm text-slate-900 dark:text-slate-200">
+              {role.name || role.role}
+            </span>
+          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0">
+            Lvl {role.hierarchy_level || '?'}
+          </span>
+        </div>
+        {role.description && (
+          <span className="text-xs text-slate-500 line-clamp-1" style={{ marginLeft: depth > 0 ? '24px' : '0' }}>{role.description}</span>
+        )}
+        
+        {/* Render Staff Members directly under the role */}
+        {myStaff.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1" style={{ marginLeft: depth > 0 ? '24px' : '0' }}>
+            {myStaff.map(staff => (
+              <div key={staff.id} className="flex items-center gap-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full px-2 py-1 shadow-sm">
+                {staff.profile ? (
+                  <img src={staff.profile} alt={staff.name} className="w-4 h-4 rounded-full" />
+                ) : (
+                  <div className="w-4 h-4 rounded-full bg-indigo-100 text-[8px] flex items-center justify-center font-bold text-indigo-700">
+                    {staff.name?.charAt(0)}
+                  </div>
+                )}
+                <span className="text-[10px] font-medium truncate max-w-[100px]">{staff.name || staff.fname + ' ' + staff.lname}</span>
+                
+                {/* Authorization: Show Assign Task if SuperAdmin OR if user is Senior to this staff */}
+                {(hasOverride || myLevel < role.hierarchy_level) && (
+                  <Link href={`/tasks/new?assignee=${staff.id}`}>
+                    <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-600 dark:text-emerald-400">
+                      <Plus className="size-3" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {children.length > 0 && (
+        <div className="flex flex-col">
+          {children.map(child => (
+            <RoleHierarchyNode key={child.id} role={child} allRoles={allRoles} allStaff={allStaff} depth={depth + 1} currentUser={currentUser} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+async function PragyaIntegrationSuspenseWrapper({ token, currentUser }: { token: string | undefined, currentUser?: any }) {
+  let pragyaDepartments: any[] = [];
+  let pragyaStats: any = null;
+  let pragyaSchedule: any[] = [];
+  let pragyaProfile: any = null;
+  let pragyaRole: any = null;
+  let pragyaStaff: any[] = [];
+
+  try {
+    if (token) {
+      const apiPromises = [
+        fetchPragyaAPI('departments'),
+        fetchPragyaAPI('stats', token),
+        fetchPragyaAPI('schedule', token),
+        fetchPragyaAPI('get-profile', token),
+        fetchPragyaAPI('my-role', token)
+      ];
+      const results = await Promise.all(apiPromises);
+      pragyaDepartments = results[0]?.status ? results[0].data : [];
+      pragyaStats = results[1]?.status ? results[1].data : null;
+      pragyaSchedule = results[2]?.status ? results[2].data : [];
+      pragyaProfile = results[3]?.status ? results[3].data : results[3];
+      const roleRes = results[4];
+      if (roleRes && roleRes.status) pragyaRole = roleRes.data;
+
+      const staffRes = await fetchPragyaAPI('staff', token);
+      if (staffRes && staffRes.status && staffRes.data) {
+        pragyaStaff = staffRes.data;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching Pragya API data:", error);
+  }
+
+  return (
+    <div className="space-y-6 mt-6 fade-in">
+      {pragyaDepartments && pragyaDepartments.length > 0 && (
+        <Card className="border-emerald-200 dark:border-emerald-900/50">
+          <CardHeader className="pb-3 border-b mb-3 border-emerald-100 dark:border-emerald-900/50">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="size-5 text-emerald-500" />
+              Departments (Live)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {pragyaDepartments.map((d: any) => (
+                <div key={d.id} className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-3 text-center border border-emerald-100 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
+                  <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 truncate">{d.name}</div>
+                  <div className="text-xs text-emerald-600/70 dark:text-emerald-500 mt-1 font-mono">{d.code}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      <PragyaStatsView stats={pragyaStats} schedule={pragyaSchedule} />
+      
+      {/* ── RAW API DATA DEBUG VIEWER ── */}
+      <Card className="border-red-200 dark:border-red-900/50 mt-8 bg-slate-50 dark:bg-slate-950">
+        <CardHeader className="pb-3 border-b mb-3 border-red-100 dark:border-red-900/50">
+          <CardTitle className="flex items-center gap-2 text-base text-red-600 dark:text-red-400">
+            <Code className="size-5" />
+            Raw API Data Monitor (Developer Mode)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="bg-slate-900 rounded-md p-4 overflow-hidden border border-slate-700">
+               <h4 className="text-emerald-400 text-xs mb-2 uppercase font-semibold">API: /departments</h4>
+               <pre className="text-xs text-slate-300 font-mono overflow-auto max-h-64 scrollbar-thin">
+                 {JSON.stringify(pragyaDepartments, null, 2)}
+               </pre>
+            </div>
+            <div className="bg-slate-900 rounded-md p-4 overflow-hidden border border-slate-700">
+               <h4 className="text-amber-400 text-xs mb-2 uppercase font-semibold">API: /stats</h4>
+               <pre className="text-xs text-slate-300 font-mono overflow-auto max-h-64 scrollbar-thin">
+                 {JSON.stringify(pragyaStats, null, 2)}
+               </pre>
+            </div>
+            <div className="bg-slate-900 rounded-md p-4 overflow-hidden border border-slate-700">
+               <h4 className="text-cyan-400 text-xs mb-2 uppercase font-semibold">API: /schedule</h4>
+               <pre className="text-xs text-slate-300 font-mono overflow-auto max-h-64 scrollbar-thin">
+                 {JSON.stringify(pragyaSchedule, null, 2)}
+               </pre>
+            </div>
+            <div className="bg-slate-900 rounded-md p-4 overflow-hidden border border-slate-700">
+               <h4 className="text-fuchsia-400 text-xs mb-2 uppercase font-semibold">API: /get-profile</h4>
+               <pre className="text-xs text-slate-300 font-mono overflow-auto max-h-64 scrollbar-thin">
+                 {JSON.stringify(pragyaProfile, null, 2)}
+               </pre>
+            </div>
+            <div className="bg-slate-900 rounded-md p-4 overflow-hidden border border-slate-700">
+               <h4 className="text-indigo-400 text-xs mb-2 uppercase font-semibold">API: /my-role</h4>
+               <pre className="text-xs text-slate-300 font-mono overflow-auto max-h-64 scrollbar-thin">
+                 {JSON.stringify(pragyaRole, null, 2)}
+               </pre>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+         {/* ── VISUAL DEPARTMENTS & ROLES VIEWER ── */}
+      {pragyaDepartments && pragyaDepartments.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <Building className="size-5 text-indigo-500" />
+            Complete Organizational Hierarchy
+          </h3>
+          <div className="flex flex-col gap-4">
+            {[
+              { level: 1, name: 'Head / Manager', color: 'bg-emerald-600' },
+              { level: 2, name: 'Lead / Senior', color: 'bg-blue-600' },
+              { level: 3, name: 'Staff / Executive', color: 'bg-indigo-600' },
+              { level: 4, name: 'Sub-role / Intern', color: 'bg-amber-600' }
+            ].map(levelObj => (
+              <details key={levelObj.level} className="group border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-950" open={levelObj.level === 1}>
+                <summary className="bg-slate-50 dark:bg-slate-900 p-4 font-bold text-lg cursor-pointer flex justify-between items-center list-none outline-none select-none">
+                  <div className="flex items-center gap-3">
+                    <span className={`${levelObj.color} text-white w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-sm`}>
+                      {levelObj.level}
+                    </span>
+                    <span className="text-slate-800 dark:text-slate-200">{levelObj.name}</span>
+                  </div>
+                  <ChevronDown className="size-5 text-slate-400 group-open:rotate-180 transition-transform duration-200" />
+                </summary>
+                
+                <div className="p-4 flex flex-col gap-4 border-t border-slate-100 dark:border-slate-800">
+                  {pragyaDepartments.map((dept: any) => {
+                    const rolesInLevel = dept.roles ? dept.roles.filter((r: any) => r.hierarchy_level === levelObj.level) : [];
+                    
+                    return (
+                      <div key={dept.id} className="border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
+                        <div className="bg-slate-100/50 dark:bg-slate-900/50 px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                          <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{dept.name}</span>
+                          <span className="text-[10px] bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-400 font-mono font-bold">{dept.code}</span>
+                        </div>
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {rolesInLevel.length > 0 ? (
+                            rolesInLevel.map((role: any) => (
+                              <RoleHierarchyNode key={role.id} role={role} allRoles={dept.roles} allStaff={pragyaStaff} currentUser={currentUser} />
+                            ))
+                          ) : (
+                            <div className="p-4 text-xs text-slate-400 italic text-center bg-slate-50/30 dark:bg-slate-900/10">
+                              No roles assigned at this level
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+function PragyaLoadingFallback() {
+  return (
+    <div className="space-y-6 mt-6 fade-in">
+      <Card className="border-emerald-200 dark:border-emerald-900/50 opacity-50">
+        <CardHeader className="pb-3 border-b mb-3 border-emerald-100 dark:border-emerald-900/50">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Activity className="size-5 text-emerald-500" />
+            Loading Live Departments...
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-16 w-full bg-emerald-50 dark:bg-emerald-950/30 rounded-lg animate-pulse"></div>
+        </CardContent>
+      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <Card className="border-amber-200 dark:border-amber-900/50 opacity-50 h-32 animate-pulse"></Card>
+         <Card className="border-cyan-200 dark:border-cyan-900/50 opacity-50 h-32 animate-pulse"></Card>
+      </div>
+    </div>
+  )
+}
+
+export function PragyaLiveIntegration({ token, currentUser }: { token: string | undefined, currentUser?: any }) {
+  return (
+    <Suspense fallback={<PragyaLoadingFallback />}>
+      <PragyaIntegrationSuspenseWrapper token={token} currentUser={currentUser} />
+    </Suspense>
+  )
 }

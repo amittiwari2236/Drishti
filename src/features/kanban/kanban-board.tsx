@@ -127,6 +127,25 @@ const COLUMN_CONFIG: Record<
     noteStyle:
       "bg-zinc-50/95 dark:bg-zinc-950/70 border-zinc-200/80 dark:border-zinc-800/50 text-zinc-950 dark:text-zinc-100",
   },
+  PENDING_ACCEPTANCE: {
+    label: "Pending Acceptance",
+    accent: "bg-amber-400",
+    headerBg: "border-amber-400/30 bg-amber-500/10 text-amber-900 dark:text-amber-200",
+    boardBg: "bg-amber-50/40 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30",
+    badgeBg: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+    tapeColor: "bg-amber-200/80 dark:bg-amber-700/80",
+    noteStyle: "bg-[#fef9c3] dark:bg-amber-950/80 border-[#fef08a] dark:border-amber-900/60 shadow-amber-900/5",
+  },
+  BACKLOG: {
+    label: "Backlog",
+    accent: "bg-zinc-400",
+    headerBg: "border-zinc-400/30 bg-zinc-500/10 text-zinc-900 dark:text-zinc-200",
+    boardBg: "bg-zinc-50/40 dark:bg-zinc-950/20 border-zinc-200/50 dark:border-zinc-900/30",
+    badgeBg: "bg-zinc-100 text-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-300",
+    tapeColor: "bg-zinc-300/60 dark:bg-zinc-400/30 border-zinc-400/40",
+    noteStyle:
+      "bg-zinc-50/95 dark:bg-zinc-950/70 border-zinc-200/80 dark:border-zinc-800/50 text-zinc-950 dark:text-zinc-100",
+  },
 };
 
 /** Pseudo-random slight rotation tilt for dynamic sticky-note feel based on string hash */

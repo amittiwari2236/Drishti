@@ -125,11 +125,19 @@ async function main() {
     { name: "Electronics & Communication", code: "ECE" },
   ];
   for (const dept of departments) {
-    await prisma.department.upsert({
+    const existing = await prisma.department.findFirst({
       where: { name: dept.name },
-      update: { code: dept.code },
-      create: dept,
     });
+    if (existing) {
+      await prisma.department.update({
+        where: { id: existing.id },
+        data: { code: dept.code },
+      });
+    } else {
+      await prisma.department.create({
+        data: dept,
+      });
+    }
   }
 
   // ── 4. Technologies ──

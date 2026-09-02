@@ -17,7 +17,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar({ allowedHrefs = [] }: { allowedHrefs?: string[] }) {
+export function AppSidebar({ allowedHrefs = [], departments = [], activeRoleContext = null }: { allowedHrefs?: string[], departments?: any[], activeRoleContext?: any }) {
   const pathname = usePathname();
 
   const groups = NAV_GROUPS.map((group) => ({

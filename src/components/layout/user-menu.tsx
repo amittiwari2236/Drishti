@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, User as UserIcon } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { authClient } from "@/lib/auth-client";
+import { logoutWithPragya } from "@/features/auth/server-actions";
 import { ROLE_LABELS } from "@/config/labels";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
@@ -30,9 +31,9 @@ export function UserMenu({
   const router = useRouter();
 
   async function handleSignOut() {
-    await authClient.signOut();
-    router.push("/login");
-    router.refresh();
+    await logoutWithPragya();
+    await authClient.signOut().catch(() => {});
+    window.location.href = "/login";
   }
 
   return (

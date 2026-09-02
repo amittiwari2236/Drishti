@@ -802,6 +802,19 @@ model Attendance {
   @@map("attendance")
 }
 
+// ─────────────────────── DYNAMIC ROLE PERMISSIONS ───────────────────────
+
+model DynamicRolePermission {
+  id             String   @id @default(cuid())
+  roleId         String   // Pragya role/sub-role ID
+  permissionCode String
+  allowed        Boolean  @default(true)
+  
+  @@unique([roleId, permissionCode])
+  @@index([roleId])
+  @@map("dynamic_role_permission")
+}
+
 // ──────────────────── PERFORMANCE SNAPSHOT ────────────────────
 
 model PerformanceSnapshot {

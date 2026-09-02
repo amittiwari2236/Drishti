@@ -47,47 +47,8 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: LayoutDashboard,
         permission: "feature:dashboard",
       },
-      /*
-      {
-        title: "Companies",
-        href: "/companies",
-        icon: Building2,
-        permission: "feature:companies",
-      },
-      */
     ],
   },
-  /*
-  {
-    label: "Internship & Teams",
-    items: [
-      {
-        title: "Batches",
-        href: "/batches",
-        icon: Layers,
-        permission: "feature:batches",
-      },
-      {
-        title: "Projects",
-        href: "/projects",
-        icon: FolderKanban,
-        permission: "feature:projects",
-      },
-      {
-        title: "Students",
-        href: "/students",
-        icon: GraduationCap,
-        permission: "feature:students",
-      },
-      {
-        title: "Mentors",
-        href: "/mentors",
-        icon: UserCog,
-        permission: "feature:mentors",
-      },
-    ],
-  },
-  */
   {
     label: "Work & Tracking",
     items: [
@@ -110,24 +71,6 @@ export const NAV_GROUPS: NavGroup[] = [
         permission: "feature:propose",
       },
       {
-        title: "Event Calendar",
-        href: "/calendar",
-        icon: CalendarDays,
-        permission: "feature:calendar",
-      },
-      {
-        title: "Daily Logs",
-        href: "/daily-logs",
-        icon: NotebookPen,
-        permission: "feature:dailylogs",
-      },
-      {
-        title: "Attendance",
-        href: "/attendance",
-        icon: CalendarCheck,
-        permission: "feature:attendance",
-      },
-      {
         title: "Reviews",
         href: "/reviews",
         icon: ClipboardCheck,
@@ -135,37 +78,6 @@ export const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
-  /*
-  {
-    label: "Insights & Assets",
-    items: [
-      {
-        title: "Analytics",
-        href: "/analytics",
-        icon: BarChart3,
-        permission: "feature:analytics",
-      },
-      {
-        title: "AI Insights",
-        href: "/ai",
-        icon: Sparkles,
-        permission: "feature:ai",
-      },
-      {
-        title: "Reports",
-        href: "/reports",
-        icon: FileText,
-        permission: "feature:reports",
-      },
-      {
-        title: "Documents",
-        href: "/documents",
-        icon: FileBox,
-        permission: "feature:documents",
-      },
-    ],
-  },
-  */
   {
     label: "Super Admin & System",
     items: [

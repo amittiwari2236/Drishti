@@ -12,6 +12,7 @@ export * from "./permission-constants";
 // Global in-memory dynamic permissions store
 let dynamicRoleCache = new Map<Role, Set<Permission>>();
 let dynamicUserOverridesCache = new Map<string, Map<Permission, boolean>>();
+let dynamicApiRoleCache = new Map<string, Set<Permission>>();
 
 export function invalidatePermissionCache() {
   // In Next.js, relying on a global stale flag across RSC and Server Actions chunks fails in dev mode.
@@ -22,7 +23,7 @@ export function invalidatePermissionCache() {
  * Fast synchronous permission check (respects Super Admin, User Overrides, Dynamic Role Permissions, and Defaults).
  */
 export function can(
-  userOrRole: Role | { role: Role; id?: string } | undefined | null,
+  userOrRole: Role | { role: Role; id?: string; activeRoleId?: string | null } | undefined | null,
   permission: Permission,
 ): boolean {
   if (!userOrRole) return false;
@@ -30,9 +31,11 @@ export function can(
     typeof userOrRole === "string" ? userOrRole : userOrRole.role;
   const userId: string | undefined =
     typeof userOrRole === "object" ? userOrRole.id : undefined;
+  const activeRoleId: string | undefined =
+    typeof userOrRole === "object" && userOrRole.activeRoleId ? String(userOrRole.activeRoleId) : undefined;
 
-  // Super Admin is never restricted
-  if (role === "MANAGER") return true;
+  // Super Admin is never restricted, EXCEPT when they switch to a sub-role.
+  if (role === "MANAGER" && !activeRoleId) return true;
 
   // Check user-level override if provided
   if (userId && dynamicUserOverridesCache.has(userId)) {
@@ -42,12 +45,22 @@ export function can(
     }
   }
 
-  // Check dynamic role cache
+  // ── True Sub-Role Dynamic Permissions ──
+  // Check if the specific API sub-role has been explicitly granted/denied permissions
+  if (activeRoleId) {
+    if (dynamicApiRoleCache.has(activeRoleId)) {
+      return dynamicApiRoleCache.get(activeRoleId)!.has(permission);
+    }
+    // STRICT MODE: If activeRoleId exists but has no custom permissions, DENY ALL
+    // Do NOT leak Base Role permissions into sub-roles.
+    return false;
+  }
+
+  // Base role dynamic permissions (which includes defaults if unmodified)
   if (dynamicRoleCache.has(role)) {
     return dynamicRoleCache.get(role)!.has(permission);
   }
 
-  // Fallback to static default matrix
   return DEFAULT_ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
 }
 
@@ -66,9 +79,15 @@ export function populatePermissionCache(
     permissionCode: string;
     allowed: boolean;
   }>,
+  dynamicRolePermissions?: Array<{
+    roleId: string;
+    permissionCode: string;
+    allowed: boolean;
+  }>
 ) {
   const newRoleCache = new Map<Role, Set<Permission>>();
   const newUserOverridesCache = new Map<string, Map<Permission, boolean>>();
+  const newDynamicApiRoleCache = new Map<string, Set<Permission>>();
 
   // Initialize all roles with defaults
   for (const [r, perms] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
@@ -98,17 +117,32 @@ export function populatePermissionCache(
     }
   }
 
+  // Apply true sub-role dynamic permissions
+  if (dynamicRolePermissions) {
+    for (const dp of dynamicRolePermissions) {
+      const dpSet = newDynamicApiRoleCache.get(dp.roleId) ?? new Set();
+      if (dp.allowed) {
+        dpSet.add(dp.permissionCode as Permission);
+      } else {
+        dpSet.delete(dp.permissionCode as Permission);
+      }
+      newDynamicApiRoleCache.set(dp.roleId, dpSet);
+    }
+  }
+
   // Atomic swap ensures no request ever reads an empty map
   dynamicRoleCache = newRoleCache;
   dynamicUserOverridesCache = newUserOverridesCache;
+  dynamicApiRoleCache = newDynamicApiRoleCache;
 }
 
 const loadPermissionsForRequest = cache(async () => {
-  const [rolePermissions, userOverrides] = await Promise.all([
+  const [rolePermissions, userOverrides, dynamicRolePerms] = await Promise.all([
     prisma.rolePermission.findMany(),
     prisma.userPermissionOverride.findMany(),
+    prisma.dynamicRolePermission.findMany(),
   ]);
-  populatePermissionCache(rolePermissions, userOverrides);
+  populatePermissionCache(rolePermissions, userOverrides, dynamicRolePerms);
   return true;
 });
 

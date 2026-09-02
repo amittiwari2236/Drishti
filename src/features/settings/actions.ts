@@ -87,7 +87,7 @@ export async function addDepartment(values: DepartmentValues) {
   const user = await requirePermission("settings:manage");
   const data = departmentSchema.parse(values);
 
-  const existing = await prisma.department.findUnique({
+  const existing = await prisma.department.findFirst({
     where: { name: data.name },
     select: { id: true },
   });
@@ -459,6 +459,128 @@ export async function resetAllRolesPermissions() {
 
   invalidatePermissionCache();
   // Broadcast with no role so ALL connected clients get refreshed
+  broadcastTaskEvent({ type: "PERMISSION_CHANGED" });
+  revalidatePath("/", "layout");
+  revalidatePath("/settings");
+  revalidatePath("/kanban");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+// ──────────────────────── True Sub-Role Dynamic Permissions ────────────────────────
+
+export async function updateDynamicRolePermission(
+  roleId: string,
+  permissionCode: string,
+  allowed: boolean
+) {
+  const user = await requireUser();
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
+    throw new Error("Only Super Administrators can manage dynamic role permissions.");
+  }
+
+  // Ensure permission code is in SystemPermission table
+  await prisma.systemPermission.upsert({
+    where: { code: permissionCode },
+    create: {
+      code: permissionCode,
+      category: "System",
+      name: permissionCode,
+    },
+    update: {},
+  });
+
+  await prisma.dynamicRolePermission.upsert({
+    where: {
+      roleId_permissionCode: {
+        roleId,
+        permissionCode,
+      },
+    },
+    create: {
+      roleId,
+      permissionCode,
+      allowed,
+    },
+    update: {
+      allowed,
+    },
+  });
+
+  await logActivity({
+    userId: user.id,
+    action: "UPDATE",
+    entityType: "DynamicRolePermission",
+    entityName: `RoleID ${roleId}:${permissionCode} -> ${allowed ? "ALLOWED" : "DENIED"}`,
+  });
+
+  invalidatePermissionCache();
+  broadcastTaskEvent({ type: "PERMISSION_CHANGED" });
+  revalidatePath("/", "layout");
+  revalidatePath("/settings");
+  revalidatePath("/kanban");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function resetDynamicRolePermissions(roleId: string) {
+  const user = await getSession();
+  if (!user || user.role !== "MANAGER") {
+    throw new Error("Unauthorized. Only SUPER ADMIN (MANAGER) can modify permissions.");
+  }
+
+  await prisma.dynamicRolePermission.deleteMany({
+    where: { roleId },
+  });
+  await logActivity({
+    userId: user.id,
+    action: "UPDATE",
+    entityType: "DynamicRolePermission",
+    entityName: `Reset dynamic permissions to defaults for RoleID: ${roleId}`,
+  });
+
+  invalidatePermissionCache();
+  broadcastTaskEvent({ type: "PERMISSION_CHANGED" });
+  revalidatePath("/", "layout");
+  revalidatePath("/settings");
+  revalidatePath("/kanban");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function grantAllDynamicRolePermissions(roleId: string) {
+  const user = await requireUser();
+  if (user.role !== "MANAGER" && !can(user, "permissions:manage")) {
+    throw new Error("Only Super Administrators can grant permissions.");
+  }
+
+  for (const code of PERMISSIONS) {
+    await prisma.systemPermission.upsert({
+      where: { code },
+      create: { code, category: "System", name: code },
+      update: {},
+    });
+
+    await prisma.dynamicRolePermission.upsert({
+      where: {
+        roleId_permissionCode: {
+          roleId,
+          permissionCode: code,
+        },
+      },
+      create: { roleId, permissionCode: code, allowed: true },
+      update: { allowed: true },
+    });
+  }
+
+  await logActivity({
+    userId: user.id,
+    action: "UPDATE",
+    entityType: "DynamicRolePermission",
+    entityName: `Granted all permissions to RoleID: ${roleId}`,
+  });
+
+  invalidatePermissionCache();
   broadcastTaskEvent({ type: "PERMISSION_CHANGED" });
   revalidatePath("/", "layout");
   revalidatePath("/settings");

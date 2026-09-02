@@ -1,0 +1,27 @@
+962: <div class="preset-item" onclick="loadPreset('teacher_login')">
+1049: <div class="preset-item" onclick="loadPreset('main_login')">
+1292: <input type="email" id="loginEmail" class="form-input" placeholder="e.g. teacher@example.com" value="">
+1296: <input type="password" id="loginPassword" class="form-input" placeholder="Password" value="">
+1299: This will send a POST request to <code>api_teacher.php</code> with <code>action: "login"</code> and automatically store the returned JWT token.
+1315: teacher_login: {
+1319: action: 'login',
+1321: password: ''
+1481: action: 'reset-password',
+1492: main_login: {
+1496: action: 'login',
+1498: password: ''
+1511: // Complete Sample Response Dictionary (Developers can view without any login/JWT)
+1518: 'login': {
+2060: 'reset-password': {
+2062: 'message': 'Reset password link sent to your email'
+2186: const email = document.getElementById('loginEmail').value.trim();
+2187: const password = document.getElementById('loginPassword').value.trim();
+2189: if (!email || !password) {
+2190: alert('Please enter both email and password.');
+2200: action: 'login',
+2202: password: password
+2449: if (autoInject && !parsedBody.token && getStoredToken() && parsedBody.action !== 'login' && parsedBody.action !== 'app-version') {
+2483: const fetchOptions = {
+2489: fetchOptions.body = bodyContent;
+2492: const response = await fetch(url, fetchOptions);
+2537: // Auto extract token from login response

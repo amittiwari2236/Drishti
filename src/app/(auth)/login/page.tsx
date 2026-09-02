@@ -2,10 +2,19 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Image from "next/image";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { fetchPragyaAPI } from "@/lib/pragya-api";
 
 export const metadata: Metadata = { title: "Sign in - Pragya Yog School" };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  let departments = [];
+  try {
+    const res = await fetchPragyaAPI("departments");
+    if (res?.status) departments = res.data;
+  } catch (error) {
+    console.error("Failed to load departments for login page", error);
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row bg-white">
       {/* ── Left: Reference Banner Panel ── */}
@@ -21,10 +30,10 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right: Clean Form Panel ── */}
-      <div className="flex w-full md:w-1/2 flex-col items-center justify-center px-6 py-12 sm:px-12 md:px-16 lg:px-24 bg-white">
+      <div className="flex w-full md:w-1/2 flex-col items-center justify-center px-6 py-12 sm:px-12 md:px-16 lg:px-24 bg-slate-50">
         <div className="w-full max-w-[460px]">
           <Suspense>
-            <LoginForm />
+            <LoginForm departments={departments} />
           </Suspense>
         </div>
       </div>

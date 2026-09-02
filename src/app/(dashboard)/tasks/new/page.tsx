@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { requireUser } from "@/lib/access";
 import { can } from "@/lib/permissions";
 import { PageHeader } from "@/components/shared/page-header";

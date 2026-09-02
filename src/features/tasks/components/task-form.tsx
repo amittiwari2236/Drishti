@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useTransition, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,6 +44,8 @@ export function TaskForm({
   taskId,
   parentId,
   onDone,
+  pragyaDepartments,
+  currentUser,
 }: {
   projects: ProjectOptions[];
   initial?: TaskValues;
@@ -55,6 +57,11 @@ export function TaskForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const form = useForm<TaskValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,8 +112,8 @@ export function TaskForm({
       const stuLevel = stuData?.level || 3;
       const stuDept = stuData?.deptId;
 
-      // Must be in the same department
-      if (currDept && stuDept && currDept !== stuDept) return false;
+      // Removed department check to explicitly allow cross-department assignment
+      // for the same hierarchy level (or lower).
       
       // Current user can only assign if their level <= student's level (smaller number = higher boss)
       if (currLevel > stuLevel) return false;
@@ -133,6 +140,10 @@ export function TaskForm({
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
     });
+  }
+
+  if (!isMounted) {
+    return null; // Prevent hydration mismatch errors for Shadcn form IDs
   }
 
   return (

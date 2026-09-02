@@ -112,11 +112,12 @@ async function cleanResetDatabase() {
     { name: "Product & UI/UX Design", code: "DESIGN" },
   ];
   for (const dept of departments) {
-    await prisma.department.upsert({
-      where: { name: dept.name },
-      update: { code: dept.code },
-      create: dept,
-    });
+    let d = await prisma.department.findFirst({ where: { name: dept.name } });
+    if (d) {
+      await prisma.department.update({ where: { id: d.id }, data: { code: dept.code } });
+    } else {
+      await prisma.department.create({ data: dept });
+    }
   }
 
   const technologies: Array<[string, string]> = [

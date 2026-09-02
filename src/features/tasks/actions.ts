@@ -13,7 +13,39 @@ import { logActivity } from "@/lib/activity";
 import { notify, notifyMany } from "@/lib/notify";
 import { storage } from "@/lib/storage";
 import { broadcastTaskEvent } from "@/lib/realtime";
+import { fetchPragyaAPI } from "@/lib/pragya-api";
 import { taskSchema, commentSchema, type TaskValues } from "@/features/tasks/schemas";
+
+async function validateHierarchyAssignment(currentUser: any, assigneeId: string) {
+  // 1. System Admin Override: If user is a MANAGER in Drishti, they have global rights.
+  if (currentUser.role === "MANAGER") {
+    return; // Authorized globally
+  }
+  
+  const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
+  if (!assignee) throw new Error("Assignee not found.");
+
+  const res = await fetchPragyaAPI('departments');
+  const pragyaDepartments = res?.status ? res.data : [];
+  
+  const roleMap = new Map();
+  pragyaDepartments.forEach((dept: any) => {
+    dept.roles?.forEach((r: any) => {
+      roleMap.set(r.name, r.hierarchy_level);
+    });
+  });
+
+  // Determine current active level from Pragya identity
+  const activeLevel = currentUser.hierarchyLevel || 
+    (currentUser.designation && roleMap.has(currentUser.designation) ? roleMap.get(currentUser.designation) : 3);
+  
+  const assignLevel = assignee.designation && roleMap.has(assignee.designation) ? roleMap.get(assignee.designation) : 3;
+
+  // 2. Standard Production Rule: Junior cannot assign to Senior.
+  if (activeLevel > assignLevel) {
+    throw new Error(`Forbidden: Level ${activeLevel} cannot assign tasks to Level ${assignLevel}.`);
+  }
+}
 
 /** Statuses a student may move their own task into. */
 const STUDENT_ALLOWED_TARGETS: TaskStatus[] = [
@@ -77,6 +109,9 @@ export async function createTask(values: TaskValues) {
     if (!assignee || assignee.companyId !== project.companyId) {
       throw new Error("Assignee does not belong to this company.");
     }
+    
+    // Strict backend enforcement of assignment hierarchy
+    await validateHierarchyAssignment(user, data.assigneeId);
   }
 
   const maxOrder = await prisma.task.aggregate({
@@ -118,6 +153,11 @@ export async function createTask(values: TaskValues) {
     entityType: "Task",
     entityId: task.id,
     entityName: task.title,
+    details: { 
+      actionType: 'CREATED_TASK',
+      targetUserId: data.assigneeId,
+      result: 'SUCCESS'
+    }
   });
 
   if (isSuperAdmin) {
@@ -223,6 +263,12 @@ export async function updateTask(id: string, values: TaskValues) {
   }
 
   const data = taskSchema.parse(values);
+  
+  if (data.assigneeId && data.assigneeId !== existing.assigneeId) {
+    // Strict backend enforcement when assignee changes
+    await validateHierarchyAssignment(user, data.assigneeId);
+  }
+
   const statusChanged = data.status !== existing.status;
 
   const task = await prisma.task.update({

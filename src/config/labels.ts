@@ -77,6 +77,8 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   PENDING: "Pending",
+  PENDING_ACCEPTANCE: "Pending Acceptance",
+  BACKLOG: "Backlog",
   IN_PROGRESS: "In Progress",
   BLOCKED: "Blocked",
   REVIEW: "Review",
@@ -190,6 +192,8 @@ export const STATUS_BADGE_STYLES: Record<string, string> = {
   CANCELLED: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
   // task statuses
   PENDING: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  PENDING_ACCEPTANCE: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  BACKLOG: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
   IN_PROGRESS:
     "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
   BLOCKED: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
