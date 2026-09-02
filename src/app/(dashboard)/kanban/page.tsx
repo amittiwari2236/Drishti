@@ -43,7 +43,18 @@ export default async function KanbanPage({
       parentId: null,
       deletedAt: null,
       ...(projectId ? { projectId } : {}),
-      ...(user.role === "INTERN" ? { assigneeId: user.id } : {}),
+      ...(user.role === "INTERN" || user.role === "EXECUTIVE" 
+        ? { 
+            AND: [
+              {
+                OR: [
+                  { assigneeId: user.id },
+                  { targetDesignation: user.designation ?? undefined }
+                ]
+              }
+            ]
+          } 
+        : {}),
       OR: [
         { approval: null },
         { approval: { status: { in: ["APPROVED", "DECLINED"] } } },
@@ -77,7 +88,13 @@ export default async function KanbanPage({
     approvalStatus: t.approval?.status ?? null,
     projectName: t.project?.name ?? "General Task",
     projectId: t.project?.id ?? "",
-    assignee: t.assignee
+    assignee: t.targetDesignation
+      ? {
+          name: `Role: ${t.targetDesignation}`,
+          image: null,
+          designation: t.targetDesignation,
+        }
+      : t.assignee
       ? {
           id: t.assignee.id,
           name: t.assignee.name,

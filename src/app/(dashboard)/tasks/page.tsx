@@ -36,7 +36,14 @@ export default async function TasksPage({
     deletedAt: null,
     ...(projectId ? { projectId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
-    ...(user.role === "INTERN" ? { assigneeId: user.id } : {}),
+    ...(user.role === "INTERN" || user.role === "EXECUTIVE" 
+      ? { 
+          OR: [
+            { assigneeId: user.id },
+            { targetDesignation: user.designation ?? undefined }
+          ]
+        } 
+      : {}),
     ...(isPendingFilter
       ? { approval: { status: "PENDING" } }
       : {
@@ -76,7 +83,7 @@ export default async function TasksPage({
     projectName: t.project?.name ?? "General Task",
     status: t.status,
     priority: t.priority,
-    assigneeName: t.assignee?.name ?? null,
+    assigneeName: t.targetDesignation ? `Role: ${t.targetDesignation}` : (t.assignee?.name ?? null),
     assigneeImage: t.assignee?.image ?? null,
     deadline: t.deadline?.toISOString() ?? null,
     subtaskCount: t._count.subtasks,

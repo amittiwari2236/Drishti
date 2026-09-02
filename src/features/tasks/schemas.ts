@@ -19,6 +19,7 @@ export const taskSchema = z.object({
   parentId: z.string().optional().or(z.literal("")),
   milestoneId: z.string().optional().or(z.literal("")),
   assigneeId: z.string().optional().or(z.literal("")),
+  targetDesignation: z.string().optional().or(z.literal("")),
   status: z.enum(TASK_STATUSES),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   deadline: z.string().optional().or(z.literal("")),

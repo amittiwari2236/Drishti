@@ -69,6 +69,7 @@ function normalize(data: TaskValues) {
     description: data.description || null,
     milestoneId: data.milestoneId || null,
     assigneeId: data.assigneeId || null,
+    targetDesignation: data.targetDesignation || null,
     status: data.status,
     priority: data.priority,
     deadline: data.deadline ? new Date(data.deadline) : null,

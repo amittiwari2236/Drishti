@@ -90,12 +90,21 @@ export function TaskForm({
     [projects, projectId]
   );
 
-  const assignableStudents = useMemo(() => {
-    const studentsToFilter = project ? project.students : (allUsers || []);
-    if (!currentUser) return studentsToFilter;
+  const assignableRoles = useMemo(() => {
+    if (!pragyaDepartments) return [];
     
-    // Admin (MANAGER) can assign to anyone (Level 1, 2, 3, 4)
-    if (currentUser.role === "MANAGER") return studentsToFilter;
+    // Extract all roles from pragyaDepartments
+    const allRoles: { name: string; level: number }[] = [];
+    pragyaDepartments.forEach(dept => {
+      dept.roles?.forEach((r: any) => {
+        allRoles.push({ name: r.name, level: r.hierarchy_level || 3 });
+      });
+    });
+
+    if (!currentUser) return allRoles;
+    
+    // Admin (MANAGER) can assign to anyone
+    if (currentUser.role === "MANAGER") return allRoles;
 
     const getRoleLevel = (role?: string | null) => {
       switch (role) {
@@ -103,25 +112,19 @@ export function TaskForm({
         case "SENIOR": return 2;
         case "EXECUTIVE": return 3;
         case "INTERN": return 4;
-        default: return 4; // Default to lowest
+        default: return 4;
       }
     };
 
     const currLevel = getRoleLevel(currentUser.role);
 
-    return studentsToFilter.filter(student => {
-      const stuLevel = getRoleLevel(student.role);
-
-      // Current user can only assign tasks to users at their level or lower (higher number)
-      // Level 1 -> 1, 2, 3, 4
-      // Level 2 -> 2, 3, 4
-      // Level 3 -> 3, 4
-      // Level 4 -> 4
-      if (currLevel > stuLevel) return false;
-
+    return allRoles.filter(role => {
+      // Map pragya hierarchy level (where 1 is highest, etc) to our strict comparison
+      // If pragya doesn't match our exact 1-4 scale, we assume currLevel must be <= role.level
+      if (currLevel > role.level) return false;
       return true;
     });
-  }, [project, allUsers, currentUser]);
+  }, [currentUser, pragyaDepartments]);
 
   function onSubmit(values: TaskValues) {
     startTransition(async () => {
@@ -218,10 +221,10 @@ export function TaskForm({
             />
             <FormField
               control={form.control}
-              name="assigneeId"
+              name="targetDesignation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assignee</FormLabel>
+                  <FormLabel>Assign to Role</FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
                     value={field.value || "none"}
@@ -234,9 +237,9 @@ export function TaskForm({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Unassigned</SelectItem>
-                      {assignableStudents.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name}
+                      {assignableRoles.map((r, i) => (
+                        <SelectItem key={`${r.name}-${i}`} value={r.name}>
+                          {r.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
