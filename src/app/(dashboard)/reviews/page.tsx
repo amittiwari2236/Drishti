@@ -187,7 +187,7 @@ export default async function ReviewsPage() {
                 <EmptyState
                   icon={Inbox}
                   title="No tasks to review"
-                  description="Tasks moved to Review or Testing appear here."
+                  description="Tasks moved to Review appear here."
                 />
               ) : (
                 <div className="grid gap-3">
@@ -202,7 +202,7 @@ export default async function ReviewsPage() {
                             {t.title}
                           </Link>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                            <span>{t.project.name}</span>
+                            <span>{t.project?.name ?? "General Task"}</span>
                             {t.assignee && (
                               <span className="flex items-center gap-1.5">
                                 <UserAvatar

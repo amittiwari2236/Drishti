@@ -85,7 +85,7 @@ export default async function TasksPage({
     projectName: t.project?.name ?? "General Task",
     status: t.status,
     priority: t.priority,
-    assigneeName: t.targetDesignation ? `Role: ${t.targetDesignation}` : (t.assignee?.name ?? null),
+    assigneeName: t.assignee?.name ?? null,
     assigneeImage: t.assignee?.image ?? null,
     deadline: t.deadline?.toISOString() ?? null,
     subtaskCount: t._count.subtasks,

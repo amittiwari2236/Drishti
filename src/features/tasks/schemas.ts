@@ -2,13 +2,8 @@ import { z } from "zod";
 
 export const TASK_STATUSES = [
   "PENDING",
-  "PENDING_ACCEPTANCE",
-  "BACKLOG",
-  "IN_PROGRESS",
-  "BLOCKED",
   "REVIEW",
   "COMPLETED",
-  "REWORK",
   "CANCELLED",
 ] as const;
 

@@ -42,7 +42,6 @@ export type KanbanTask = {
 
 const COLUMNS: TaskStatus[] = [
   "PENDING",
-  "IN_PROGRESS",
   "REVIEW",
   "COMPLETED",
   "CANCELLED",
@@ -69,15 +68,6 @@ const COLUMN_CONFIG: Record<
     tapeColor: "bg-amber-200/80 dark:bg-amber-700/80",
     noteStyle: "bg-[#fef9c3] dark:bg-amber-950/80 border-[#fef08a] dark:border-amber-900/60 shadow-amber-900/5",
   },
-  IN_PROGRESS: {
-    label: "In Progress",
-    accent: "bg-blue-400",
-    headerBg: "border-blue-400/30 bg-blue-500/10 text-blue-900 dark:text-blue-200",
-    boardBg: "bg-blue-50/40 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-900/30",
-    badgeBg: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-    tapeColor: "bg-blue-200/80 dark:bg-blue-700/80",
-    noteStyle: "bg-[#dbeafe] dark:bg-blue-950/80 border-[#bfdbfe] dark:border-blue-900/60 shadow-blue-900/5",
-  },
   REVIEW: {
     label: "Review",
     accent: "bg-purple-400",
@@ -97,47 +87,8 @@ const COLUMN_CONFIG: Record<
     noteStyle:
       "bg-emerald-50/95 dark:bg-emerald-950/70 border-emerald-200/80 dark:border-emerald-800/50 text-emerald-950 dark:text-emerald-100",
   },
-  BLOCKED: {
-    label: "Blocked",
-    accent: "bg-red-500",
-    headerBg: "border-red-400/30 bg-red-500/10 text-red-900 dark:text-red-200",
-    boardBg: "bg-red-50/40 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30",
-    badgeBg: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
-    tapeColor: "bg-red-300/60 dark:bg-red-400/30 border-red-400/40",
-    noteStyle:
-      "bg-red-50/95 dark:bg-red-950/70 border-red-200/80 dark:border-red-800/50 text-red-950 dark:text-red-100",
-  },
-  REWORK: {
-    label: "Rework",
-    accent: "bg-orange-500",
-    headerBg: "border-orange-400/30 bg-orange-500/10 text-orange-900 dark:text-orange-200",
-    boardBg: "bg-orange-50/40 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30",
-    badgeBg: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300",
-    tapeColor: "bg-orange-300/60 dark:bg-orange-400/30 border-orange-400/40",
-    noteStyle:
-      "bg-orange-50/95 dark:bg-orange-950/70 border-orange-200/80 dark:border-orange-800/50 text-orange-950 dark:text-orange-100",
-  },
   CANCELLED: {
     label: "Cancelled",
-    accent: "bg-zinc-400",
-    headerBg: "border-zinc-400/30 bg-zinc-500/10 text-zinc-900 dark:text-zinc-200",
-    boardBg: "bg-zinc-50/40 dark:bg-zinc-950/20 border-zinc-200/50 dark:border-zinc-900/30",
-    badgeBg: "bg-zinc-100 text-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-300",
-    tapeColor: "bg-zinc-300/60 dark:bg-zinc-400/30 border-zinc-400/40",
-    noteStyle:
-      "bg-zinc-50/95 dark:bg-zinc-950/70 border-zinc-200/80 dark:border-zinc-800/50 text-zinc-950 dark:text-zinc-100",
-  },
-  PENDING_ACCEPTANCE: {
-    label: "Pending Acceptance",
-    accent: "bg-amber-400",
-    headerBg: "border-amber-400/30 bg-amber-500/10 text-amber-900 dark:text-amber-200",
-    boardBg: "bg-amber-50/40 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30",
-    badgeBg: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
-    tapeColor: "bg-amber-200/80 dark:bg-amber-700/80",
-    noteStyle: "bg-[#fef9c3] dark:bg-amber-950/80 border-[#fef08a] dark:border-amber-900/60 shadow-amber-900/5",
-  },
-  BACKLOG: {
-    label: "Backlog",
     accent: "bg-zinc-400",
     headerBg: "border-zinc-400/30 bg-zinc-500/10 text-zinc-900 dark:text-zinc-200",
     boardBg: "bg-zinc-50/40 dark:bg-zinc-950/20 border-zinc-200/50 dark:border-zinc-900/30",
@@ -322,9 +273,7 @@ function Column({
   );
 }
 
-/** Tasks whose real status is BLOCKED/REWORK appear in mapped columns if they existed, but since we map to IN_PROGRESS, they show there. */
 function columnOf(status: TaskStatus): TaskStatus {
-  if (status === "BLOCKED" || status === "REWORK") return "IN_PROGRESS";
   return status;
 }
 

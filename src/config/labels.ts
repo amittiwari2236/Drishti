@@ -77,13 +77,8 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   PENDING: "Pending",
-  PENDING_ACCEPTANCE: "Pending Acceptance",
-  BACKLOG: "Backlog",
-  IN_PROGRESS: "In Progress",
-  BLOCKED: "Blocked",
   REVIEW: "Review",
   COMPLETED: "Completed",
-  REWORK: "Rework",
   CANCELLED: "Cancelled",
 };
 

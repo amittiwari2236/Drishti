@@ -26,8 +26,7 @@ import {
   type CommentItem,
 } from "@/features/tasks/components/comments-section";
 import { DeleteTaskButton } from "@/features/tasks/components/delete-task-button";
-import { ReviewDialog } from "@/features/reviews/components/review-dialog";
-import { AcknowledgeTaskButton } from "@/features/tasks/components/acknowledge-task-button";
+import { TaskStateButtons } from "@/features/tasks/components/task-state-buttons";
 import { TaskApprovalButtons } from "@/features/tasks/components/task-approval-buttons";
 import { Badge } from "@/components/ui/badge";
 
@@ -153,26 +152,12 @@ export default async function TaskDetailPage({
             {user.role === "MANAGER" && task.approval?.status === "PENDING" && (
               <TaskApprovalButtons taskId={task.id} />
             )}
-            {isStudent && isAssignee && (
-              <AcknowledgeTaskButton
-                taskId={task.id}
-                taskTitle={task.title}
-                alreadyAcknowledged={!!todayAck}
-                acknowledgementStatus={todayAck?.status}
-              />
-            )}
-            {canReview && (
-              <ReviewDialog
-                targetType="TASK"
-                targetId={task.id}
-                title={`Review "${task.title}"`}
-                trigger={
-                  <Button variant="outline">
-                    <ClipboardCheck className="size-4" /> Review
-                  </Button>
-                }
-              />
-            )}
+            <TaskStateButtons 
+              taskId={task.id} 
+              status={task.status} 
+              isAssignee={isAssignee} 
+              canEdit={canEdit} 
+            />
             {canEdit && (
               <Button asChild variant="outline">
                 <Link href={`/tasks/${task.id}/edit`}>

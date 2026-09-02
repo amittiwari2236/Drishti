@@ -257,10 +257,9 @@ function TaskListView({ tasks, showAssignButton }: { tasks: PopulatedTask[], sho
                   let statusColor = "bg-secondary";
                   const statusStr = task.status as string;
                   if (statusStr === "COMPLETED") statusColor = "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
-                  if (statusStr === "IN_PROGRESS") statusColor = "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-                  if (statusStr === "PENDING_ACCEPTANCE") statusColor = "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
-                  if (statusStr === "BLOCKED") statusColor = "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400";
-                  if (statusStr === "REVIEW") statusColor = "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+                  if (statusStr === "REVIEW") statusColor = "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+                  if (statusStr === "PENDING") statusColor = "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+                  if (statusStr === "CANCELLED") statusColor = "bg-zinc-100 text-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400";
 
                   // Priority colors
                   let priorityColor = "border-muted-foreground/30";

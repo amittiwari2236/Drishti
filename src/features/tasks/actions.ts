@@ -35,8 +35,6 @@ async function validateHierarchyAssignment(currentUser: any, assigneeId: string)
 
 /** Statuses a student may move their own task into. */
 const STUDENT_ALLOWED_TARGETS: TaskStatus[] = [
-  "IN_PROGRESS",
-  "BLOCKED",
   "REVIEW",
 ];
 
@@ -412,7 +410,7 @@ export async function moveTask(
       !STUDENT_ALLOWED_TARGETS.includes(status)
     ) {
       throw new Error(
-        "Students can move tasks to In Progress, Blocked, or Review only."
+        "Students can move tasks to Review only."
       );
     }
   }
@@ -441,7 +439,7 @@ export async function moveTask(
     });
 
     // Notify mentors when a task enters review.
-    if (status === "REVIEW") {
+    if (status === "REVIEW" && task.projectId) {
       const mentors = await prisma.projectMentor.findMany({
         where: { projectId: task.projectId },
         select: { userId: true },
@@ -713,11 +711,12 @@ export async function declineTask(taskId: string) {
 
 export async function markTaskAsReview(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "MANAGER") {
-    throw new Error("Only Super Admins can move tasks to Review.");
-  }
   const task = await getTaskOrThrow(taskId);
   assertCompanyAccess(user, task.companyId);
+
+  if (task.assigneeId !== user.id && user.role !== "MANAGER") {
+    throw new Error("Only the assignee can review this task.");
+  }
 
   await prisma.task.update({
     where: { id: taskId },
@@ -752,11 +751,13 @@ export async function markTaskAsReview(taskId: string) {
 
 export async function completeTask(taskId: string) {
   const user = await requireUser();
-  if (user.role !== "MANAGER") {
-    throw new Error("Only Super Admins can complete tasks.");
-  }
   const task = await getTaskOrThrow(taskId);
   assertCompanyAccess(user, task.companyId);
+
+  const canComplete = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
+  if (!canComplete) {
+    throw new Error("You do not have permission to complete this task.");
+  }
 
   await prisma.task.update({
     where: { id: taskId },
@@ -780,6 +781,47 @@ export async function completeTask(taskId: string) {
       projectId: task.projectId,
       companyId: task.companyId,
       status: "COMPLETED",
+      order: task.order,
+    });
+  });
+
+  revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/tasks");
+  revalidatePath("/kanban");
+}
+
+export async function cancelTask(taskId: string) {
+  const user = await requireUser();
+  const task = await getTaskOrThrow(taskId);
+  assertCompanyAccess(user, task.companyId);
+
+  const canCancel = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
+  if (!canCancel) {
+    throw new Error("You do not have permission to cancel this task.");
+  }
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { status: "CANCELLED" },
+  });
+
+  await logActivity({
+    userId: user.id,
+    companyId: task.companyId,
+    action: "STATUS_CHANGE",
+    entityType: "Task",
+    entityId: taskId,
+    entityName: task.title,
+    details: { from: task.status, to: "CANCELLED" },
+  });
+
+  import("@/lib/realtime").then(({ broadcastTaskEvent }) => {
+    broadcastTaskEvent({
+      type: "TASK_MOVED",
+      taskId,
+      projectId: task.projectId,
+      companyId: task.companyId,
+      status: "CANCELLED",
       order: task.order,
     });
   });

@@ -11,8 +11,8 @@ import { reviewSchema, type ReviewValues } from "@/features/reviews/schemas";
 
 const VERDICT_TO_TASK_STATUS: Record<string, TaskStatus> = {
   APPROVED: "COMPLETED",
-  REWORK: "REWORK",
-  REJECTED: "REWORK",
+  REWORK: "PENDING",
+  REJECTED: "PENDING",
 };
 
 /** Mentor reviews a task that is in REVIEW. */

@@ -250,7 +250,7 @@ export function PermissionsManagement({
     if (selectedApiRole) {
       startTransition(async () => {
         try {
-          await resetDynamicRolePermissions(selectedApiRole.id, selectedApiRole.baseRole);
+          await resetDynamicRolePermissions(selectedApiRole.id);
           const defaults = DEFAULT_ROLE_PERMISSIONS[selectedApiRole.baseRole] ?? [];
           setDynamicRolePermissionsState((prev) =>
             prev

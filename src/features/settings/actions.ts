@@ -524,7 +524,7 @@ export async function updateDynamicRolePermission(
 }
 
 export async function resetDynamicRolePermissions(roleId: string) {
-  const user = await getSession();
+  const user = await requireUser();
   if (!user || user.role !== "MANAGER") {
     throw new Error("Unauthorized. Only SUPER ADMIN (MANAGER) can modify permissions.");
   }
