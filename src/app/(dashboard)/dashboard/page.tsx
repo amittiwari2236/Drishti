@@ -168,7 +168,7 @@ export default async function DashboardPage() {
       where: { assigneeId: { in: [...memberIds, user.id] }, ...scope },
       include: { assignee: true }
     });
-    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId)));
+    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId).filter(Boolean))) as string[];
     roleProjects = await prisma.project.findMany({
       where: { id: { in: projectIds } },
       include: { tasks: true }
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
       where: { assigneeId: user.id, ...scope },
       include: { assignee: true }
     });
-    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId)));
+    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId).filter(Boolean))) as string[];
     roleProjects = await prisma.project.findMany({
       where: { id: { in: projectIds } },
       include: { tasks: true }
