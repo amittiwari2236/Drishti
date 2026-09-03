@@ -580,7 +580,7 @@ model TeamMember {
 
 model Task {
   id             String     @id @default(cuid())
-  companyId      String
+  companyId      String?
   projectId      String?
   milestoneId    String?
   parentId       String?
@@ -600,7 +600,7 @@ model Task {
   createdById    String?
   deletedAt      DateTime?
 
-  company     Company          @relation(fields: [companyId], references: [id])
+  company     Company?         @relation(fields: [companyId], references: [id])
   project     Project?         @relation(fields: [projectId], references: [id])
   milestone   Milestone?       @relation(fields: [milestoneId], references: [id])
   parent      Task?            @relation("Subtasks", fields: [parentId], references: [id])
@@ -713,7 +713,7 @@ model DailyLog {
 
 model Review {
   id         String           @id @default(cuid())
-  companyId  String
+  companyId  String?
   targetType ReviewTargetType
   targetId   String
   dailyLogId String? // convenience FK when reviewing daily logs
@@ -726,7 +726,7 @@ model Review {
   updatedAt  DateTime         @updatedAt
   deletedAt  DateTime?
 
-  company  Company   @relation(fields: [companyId], references: [id])
+  company  Company?  @relation(fields: [companyId], references: [id])
   dailyLog DailyLog? @relation(fields: [dailyLogId], references: [id])
   reviewee User      @relation("Reviewee", fields: [revieweeId], references: [id])
   reviewer User      @relation("Reviewer", fields: [reviewerId], references: [id])

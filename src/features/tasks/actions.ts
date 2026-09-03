@@ -79,49 +79,27 @@ export async function createTask(values: TaskValues) {
   const data = taskSchema.parse(values);
 
   let project = null;
-  let companyId = await resolveCompanyForWrite(user).catch(() => user.companyId);
-
-  // If even resolveCompanyForWrite fails (e.g. general MANAGER task with 'All Companies'), fallback to assignee's company or empty string.
-  if (!companyId && data.assigneeId) {
-    const assignee = await prisma.user.findUnique({ where: { id: data.assigneeId }});
-    companyId = assignee?.companyId ?? "";
-  }
-  companyId = companyId || "";
 
   if (data.projectId) {
     project = await prisma.project.findUnique({
       where: { id: data.projectId },
     });
     if (!project) throw new Error("Project not found");
-    assertCompanyAccess(user, project.companyId);
-    companyId = project.companyId;
+    // Tasks are now independent, so we don't strictly assert company access here
+    // as tasks can exist without companies.
   }
 
   if (data.assigneeId) {
     const assignee = await prisma.user.findUnique({
       where: { id: data.assigneeId },
     });
-    // If the assignee has no companyId (e.g. they are an admin) and companyId is also missing/empty, it's fine temporarily if we catch it below.
-    if (!assignee || (assignee.companyId && companyId && assignee.companyId !== companyId)) {
-      throw new Error("Assignee does not belong to this company.");
-    }
+    if (!assignee) throw new Error("Assignee not found.");
     
     // Strict backend enforcement of assignment hierarchy
     await validateHierarchyAssignment(user, data.assigneeId);
   }
-
-  if (!companyId) {
-    const defaultCompany = await prisma.company.findFirst();
-    if (defaultCompany) {
-      companyId = defaultCompany.id;
-    } else {
-      throw new Error("Unable to determine company for this task. Please select a company from the switcher, assign a project, or select a non-admin assignee.");
-    }
-  }
-
   const maxOrder = await prisma.task.aggregate({
     where: { 
-      companyId: companyId,
       ...(data.projectId ? { projectId: data.projectId } : { projectId: null }),
       status: data.status 
     },
@@ -133,7 +111,6 @@ export async function createTask(values: TaskValues) {
   const task = await prisma.task.create({
     data: {
       ...normalize(data),
-      companyId: companyId,
       projectId: data.projectId || null,
       parentId: data.parentId || null,
       order: (maxOrder._max.order ?? 0) + 1,
@@ -157,7 +134,6 @@ export async function createTask(values: TaskValues) {
 
   await logActivity({
     userId: user.id,
-    companyId: companyId,
     action: "CREATE",
     entityType: "Task",
     entityId: task.id,
@@ -184,7 +160,6 @@ export async function createTask(values: TaskValues) {
       type: "TASK_CREATED",
       taskId: task.id,
       projectId: task.projectId,
-      companyId: task.companyId,
       status: task.status,
       order: task.order,
       task: {
@@ -227,7 +202,6 @@ export async function createTask(values: TaskValues) {
       type: "TASK_APPROVAL_REQUESTED",
       taskId: task.id,
       projectId: task.projectId,
-      companyId: task.companyId,
       role: user.role,
       userId: user.id,
       task: {
@@ -249,10 +223,9 @@ export async function updateTask(id: string, values: TaskValues) {
     throw new Error("Unauthorized");
   }
   const existing = await getTaskOrThrow(id);
-  assertCompanyAccess(user, existing.companyId);
 
   // Full task managers (have task:assign = teacher/mentor/instructor/coordinator)
-  // can update any task in their company scope.
+  // can update any task.
   // Students and basic users can only update tasks they created or are assigned to.
   const isFullManager =
     user.role === "MANAGER" ||
@@ -308,7 +281,6 @@ export async function updateTask(id: string, values: TaskValues) {
 
   await logActivity({
     userId: user.id,
-    companyId: existing.companyId,
     action: statusChanged ? "STATUS_CHANGE" : "UPDATE",
     entityType: "Task",
     entityId: task.id,
@@ -322,7 +294,6 @@ export async function updateTask(id: string, values: TaskValues) {
     type: "TASK_UPDATED",
     taskId: task.id,
     projectId: task.projectId,
-    companyId: task.companyId,
     status: task.status,
     order: task.order,
     task: {
@@ -347,10 +318,9 @@ export async function deleteTask(id: string) {
     throw new Error("Unauthorized");
   }
   const existing = await getTaskOrThrow(id);
-  assertCompanyAccess(user, existing.companyId);
 
   // Full task managers (teacher, mentor, instructor, coordinator, company_admin)
-  // can delete any task in their company scope.
+  // can delete any task.
   // Regular users can only delete tasks they created.
   const isFullManager =
     user.role === "MANAGER" ||
@@ -367,7 +337,6 @@ export async function deleteTask(id: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: existing.companyId,
     action: "DELETE",
     entityType: "Task",
     entityId: id,
@@ -377,7 +346,6 @@ export async function deleteTask(id: string) {
   broadcastTaskEvent({
     type: "TASK_DELETED",
     taskId: id,
-    companyId: existing.companyId,
   });
 
   revalidatePath("/tasks");
@@ -402,7 +370,6 @@ export async function moveTask(
   }
 
   const task = await getTaskOrThrow(id);
-  assertCompanyAccess(user, task.companyId);
 
   if (user.role === "INTERN") {
     if (task.assigneeId !== user.id) {
@@ -433,7 +400,6 @@ export async function moveTask(
   if (statusChanged) {
     await logActivity({
       userId: user.id,
-      companyId: task.companyId,
       action: "STATUS_CHANGE",
       entityType: "Task",
       entityId: id,
@@ -465,7 +431,6 @@ export async function moveTask(
     type: "TASK_MOVED",
     taskId: id,
     projectId: task.projectId,
-    companyId: task.companyId,
     status,
     order: newOrder,
   });
@@ -479,7 +444,6 @@ export async function moveTask(
 export async function addComment(taskId: string, values: { content: string }) {
   const user = await requireUser();
   const task = await getTaskOrThrow(taskId);
-  assertCompanyAccess(user, task.companyId);
 
   const data = commentSchema.parse(values);
   await prisma.taskComment.create({
@@ -488,7 +452,6 @@ export async function addComment(taskId: string, values: { content: string }) {
 
   await logActivity({
     userId: user.id,
-    companyId: task.companyId,
     action: "COMMENT",
     entityType: "Task",
     entityId: taskId,
@@ -521,7 +484,6 @@ export async function deleteComment(commentId: string) {
 export async function addTaskAttachment(taskId: string, formData: FormData) {
   const user = await requireUser();
   const task = await getTaskOrThrow(taskId);
-  assertCompanyAccess(user, task.companyId);
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -543,7 +505,6 @@ export async function addTaskAttachment(taskId: string, formData: FormData) {
 
   await logActivity({
     userId: user.id,
-    companyId: task.companyId,
     action: "UPLOAD",
     entityType: "Task",
     entityId: taskId,
@@ -611,7 +572,6 @@ export async function approveTask(taskId: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: approval.task.companyId,
     action: "APPROVE",
     entityType: "Task",
     entityId: taskId,
@@ -642,7 +602,6 @@ export async function approveTask(taskId: string) {
     type: "TASK_MOVED",
     taskId: task.id,
     projectId: task.projectId,
-    companyId: task.companyId,
     status: "REVIEW",
     order: task.order,
   });
@@ -683,7 +642,6 @@ export async function declineTask(taskId: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: approval.task.companyId,
     action: "REJECT",
     entityType: "Task",
     entityId: taskId,
@@ -702,7 +660,6 @@ export async function declineTask(taskId: string) {
     broadcastTaskEvent({
       type: "TASK_MOVED",
       taskId: taskId,
-      companyId: approval.task.companyId,
       status: "CANCELLED",
     });
   });
@@ -715,7 +672,7 @@ export async function declineTask(taskId: string) {
 export async function markTaskAsReview(taskId: string) {
   const user = await requireUser();
   const task = await getTaskOrThrow(taskId);
-  assertCompanyAccess(user, task.companyId);
+  
 
   if (task.assigneeId !== user.id && user.role !== "MANAGER") {
     throw new Error("Only the assignee can review this task.");
@@ -728,7 +685,7 @@ export async function markTaskAsReview(taskId: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: task.companyId,
+    
     action: "STATUS_CHANGE",
     entityType: "Task",
     entityId: taskId,
@@ -741,7 +698,7 @@ export async function markTaskAsReview(taskId: string) {
       type: "TASK_MOVED",
       taskId,
       projectId: task.projectId,
-      companyId: task.companyId,
+      
       status: "REVIEW",
       order: task.order,
     });
@@ -755,7 +712,7 @@ export async function markTaskAsReview(taskId: string) {
 export async function completeTask(taskId: string) {
   const user = await requireUser();
   const task = await getTaskOrThrow(taskId);
-  assertCompanyAccess(user, task.companyId);
+  
 
   const canComplete = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
   if (!canComplete) {
@@ -769,7 +726,7 @@ export async function completeTask(taskId: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: task.companyId,
+    
     action: "STATUS_CHANGE",
     entityType: "Task",
     entityId: taskId,
@@ -782,7 +739,7 @@ export async function completeTask(taskId: string) {
       type: "TASK_MOVED",
       taskId,
       projectId: task.projectId,
-      companyId: task.companyId,
+      
       status: "COMPLETED",
       order: task.order,
     });
@@ -796,7 +753,7 @@ export async function completeTask(taskId: string) {
 export async function cancelTask(taskId: string) {
   const user = await requireUser();
   const task = await getTaskOrThrow(taskId);
-  assertCompanyAccess(user, task.companyId);
+  
 
   const canCancel = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
   if (!canCancel) {
@@ -810,7 +767,7 @@ export async function cancelTask(taskId: string) {
 
   await logActivity({
     userId: user.id,
-    companyId: task.companyId,
+    
     action: "STATUS_CHANGE",
     entityType: "Task",
     entityId: taskId,
@@ -823,7 +780,7 @@ export async function cancelTask(taskId: string) {
       type: "TASK_MOVED",
       taskId,
       projectId: task.projectId,
-      companyId: task.companyId,
+      
       status: "CANCELLED",
       order: task.order,
     });

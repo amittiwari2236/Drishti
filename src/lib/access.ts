@@ -93,10 +93,10 @@ export const getSession = cache(async () => {
       const parsedContext = JSON.parse(activeRoleCookie);
       
       // Override properties
-      user.hierarchyLevel = parsedContext.hierarchyLevel;
+      user.hierarchyLevel = parsedContext.hierarchyLevel ?? null;
       user.departmentId = parsedContext.departmentId ? String(parsedContext.departmentId) : null;
-      user.activeRoleName = parsedContext.roleName;
-      user.designation = parsedContext.roleName;
+      user.activeRoleName = parsedContext.roleName ?? null;
+      user.designation = parsedContext.roleName ?? null;
       user.activeRoleId = parsedContext.roleId ? String(parsedContext.roleId) : null;
 
       // Map the active hierarchy level to a base Prisma Role for strict permission matching
@@ -201,7 +201,8 @@ export function assertCompanyAccess(
   entityCompanyId: string | null | undefined
 ) {
   if (user.role === "MANAGER") return;
-  if (!entityCompanyId || entityCompanyId !== user.companyId) {
+  if (!entityCompanyId) return; // Global entities without a company are accessible (rely on component-level checks)
+  if (entityCompanyId !== user.companyId) {
     throw new Error("Access denied: entity belongs to another company.");
   }
 }

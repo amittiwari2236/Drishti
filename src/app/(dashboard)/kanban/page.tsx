@@ -39,7 +39,6 @@ export default async function KanbanPage({
 
   const tasks = await prisma.task.findMany({
     where: {
-      ...scope,
       parentId: null,
       deletedAt: null,
       ...(projectId ? { projectId } : {}),

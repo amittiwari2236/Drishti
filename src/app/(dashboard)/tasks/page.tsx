@@ -32,7 +32,6 @@ export default async function TasksPage({
     : undefined;
 
   const where: Prisma.TaskWhereInput = {
-    ...scope,
     deletedAt: null,
     ...(projectId ? { projectId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
