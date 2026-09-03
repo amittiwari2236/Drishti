@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 export const fetchPragyaAPI = async (action: string, customToken?: string, extraData?: Record<string, string>) => {
   try {
@@ -37,7 +38,6 @@ export const fetchPragyaAPI = async (action: string, customToken?: string, extra
 };
 
 export async function syncRolesToUsers() {
-  const { prisma } = await import("@/lib/prisma");
   const res = await fetchPragyaAPI("departments");
   if (!res?.status || !res.data) return;
 
