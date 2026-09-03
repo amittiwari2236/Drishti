@@ -180,9 +180,10 @@ export default async function TaskDetailPage({
             </CardHeader>
             <CardContent>
               {task.description ? (
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                  {task.description}
-                </p>
+                <div 
+                  className="prose prose-sm max-w-none text-muted-foreground"
+                  dangerouslySetInnerHTML={{ __html: task.description }}
+                />
               ) : (
                 <p className="text-sm text-muted-foreground">
                   No description provided.
