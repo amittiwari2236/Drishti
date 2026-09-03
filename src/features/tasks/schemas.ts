@@ -9,7 +9,7 @@ export const TASK_STATUSES = [
 
 export const taskSchema = z.object({
   title: z.string().min(2, "Title is required").max(200),
-  description: z.string().max(6000).optional().or(z.literal("")),
+  description: z.string().max(65000).optional().or(z.literal("")),
   projectId: z.string().optional().or(z.literal("")),
   parentId: z.string().optional().or(z.literal("")),
   milestoneId: z.string().optional().or(z.literal("")),

@@ -111,7 +111,12 @@ export async function createTask(values: TaskValues) {
   }
 
   if (!companyId) {
-    throw new Error("Unable to determine company for this task. Please select a company from the switcher, assign a project, or select a non-admin assignee.");
+    const defaultCompany = await prisma.company.findFirst();
+    if (defaultCompany) {
+      companyId = defaultCompany.id;
+    } else {
+      throw new Error("Unable to determine company for this task. Please select a company from the switcher, assign a project, or select a non-admin assignee.");
+    }
   }
 
   const maxOrder = await prisma.task.aggregate({
