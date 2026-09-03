@@ -718,7 +718,7 @@ export async function completeTask(taskId: string) {
   const task = await getTaskOrThrow(taskId);
   
 
-  const canComplete = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
+  const canComplete = user.role === "MANAGER" || task.createdById === user.id || task.assigneeId === user.id || can(user, "task:update");
   if (!canComplete) {
     throw new Error("You do not have permission to complete this task.");
   }
@@ -759,7 +759,7 @@ export async function cancelTask(taskId: string) {
   const task = await getTaskOrThrow(taskId);
   
 
-  const canCancel = user.role === "MANAGER" || task.createdById === user.id || can(user, "task:update");
+  const canCancel = user.role === "MANAGER" || task.createdById === user.id || task.assigneeId === user.id || can(user, "task:update");
   if (!canCancel) {
     throw new Error("You do not have permission to cancel this task.");
   }
