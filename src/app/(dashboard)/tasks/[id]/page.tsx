@@ -68,7 +68,6 @@ export default async function TaskDetailPage({
     },
   });
   if (!task) notFound();
-  assertCompanyAccess(user, task.companyId);
 
   const reviews = await prisma.review.findMany({
     where: { targetType: "TASK", targetId: task.id, deletedAt: null },

@@ -27,7 +27,6 @@ export default async function EditTaskPage({
     include: { dependencies: { select: { dependsOnId: true } } },
   });
   if (!task) notFound();
-  assertCompanyAccess(user, task.companyId);
 
   // Full task managers (MANAGER + roles with task:assign like SENIOR, EXECUTIVE,
   // EXECUTIVE, SENIOR, MANAGER) can edit any task in their company scope.
