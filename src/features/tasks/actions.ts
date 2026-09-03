@@ -18,6 +18,10 @@ import { fetchPragyaAPI } from "@/lib/pragya-api";
 import { taskSchema, commentSchema, type TaskValues } from "@/features/tasks/schemas";
 
 async function validateHierarchyAssignment(currentUser: any, assigneeId: string) {
+  if (currentUser.id === assigneeId) {
+    throw new Error("You cannot assign a task to yourself.");
+  }
+
   if (currentUser.hierarchyLevel === 1 || currentUser.role === "MANAGER") {
     return; // Authorized globally
   }

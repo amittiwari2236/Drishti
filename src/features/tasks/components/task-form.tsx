@@ -100,12 +100,12 @@ export function TaskForm({
     if (!allUsers) return [];
     if (!currentUser) return allUsers;
     
-    // Admin (MANAGER or hierarchyLevel 1) can assign to anyone
-    if (currentUser.hierarchyLevel === 1 || currentUser.role === "MANAGER") return allUsers;
-
     const currLevel = currentUser.hierarchyLevel || 4;
+    const isAdmin = currLevel === 1 || currentUser.role === "MANAGER";
 
     return allUsers.filter(u => {
+      if (u.id === currentUser.id) return false;
+      if (isAdmin) return true;
       const uLevel = u.hierarchyLevel || 4;
       return currLevel <= uLevel;
     });

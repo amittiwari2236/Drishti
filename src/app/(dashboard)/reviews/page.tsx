@@ -79,6 +79,7 @@ export default async function ReviewsPage() {
               ...scope,
               deletedAt: null,
               status: "REVIEW",
+              assigneeId: { not: user.id },
             },
             include: {
               project: { select: { name: true } },
