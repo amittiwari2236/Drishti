@@ -36,10 +36,7 @@ export function AppSidebar({ allowedHrefs = [], departments = [], activeRoleCont
                   <Eye className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-semibold">DRISHTI</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    Internship Platform
-                  </span>
+                  <span className="truncate font-semibold">Drishti Pyshk</span>
                 </div>
               </Link>
             </SidebarMenuButton>
