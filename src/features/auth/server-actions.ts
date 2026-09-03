@@ -61,7 +61,13 @@ export async function mockRoleLogin(context: {
 }) {
   try {
     const cookieStore = await cookies();
-    const email = "demo-teacher@example.com";
+    const email = `role_${context.roleId}@demo.com`;
+    
+    // Map hierarchy level to Prisma Role enum
+    let enumRole: "MANAGER" | "SENIOR" | "EXECUTIVE" | "INTERN" = "INTERN";
+    if (context.hierarchyLevel === 1) enumRole = "MANAGER";
+    else if (context.hierarchyLevel === 2) enumRole = "SENIOR";
+    else if (context.hierarchyLevel === 3) enumRole = "EXECUTIVE";
     
     let dbUser = await prisma.user.findUnique({ where: { email } });
     if (!dbUser) {
@@ -72,8 +78,8 @@ export async function mockRoleLogin(context: {
           phone: "1111111111",
           designation: context.roleName || "Demo Staff Member",
           departmentId: null,
-          hierarchyLevel: 3,
-          role: "EXECUTIVE", // Strictly a teacher/staff role, not a MANAGER
+          hierarchyLevel: context.hierarchyLevel || 4,
+          role: enumRole,
         }
       });
     } else {
@@ -83,8 +89,8 @@ export async function mockRoleLogin(context: {
         data: { 
           name: context.roleName || "Demo User",
           designation: context.roleName || "Demo Staff Member",
-          hierarchyLevel: 3, 
-          role: "EXECUTIVE" 
+          hierarchyLevel: context.hierarchyLevel || 4,
+          role: enumRole,
         }
       });
     }

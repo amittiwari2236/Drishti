@@ -9,6 +9,11 @@ import { toast } from "sonner";
 import { taskSchema, type TaskValues } from "@/features/tasks/schemas";
 import { createTask, updateTask } from "@/features/tasks/actions";
 import { PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/config/labels";
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
+
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+
 import { MultiSelect } from "@/components/shared/multi-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +30,14 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+
 
 export type ProjectOptions = {
   id: string;
@@ -53,7 +62,7 @@ export function TaskForm({
   parentId?: string;
   onDone?: () => void;
   currentUser?: { id: string; role: string; designation?: string | null; hierarchyLevel?: number | null };
-  allUsers?: { id: string; name: string; designation?: string | null; hierarchyLevel?: number | null }[];
+  allUsers?: { id: string; name: string; role: string; designation?: string | null; hierarchyLevel?: number | null }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -144,57 +153,7 @@ export function TaskForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      rows={4}
-                      placeholder="What needs to be done, acceptance criteria..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="projectId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Project</FormLabel>
-                  <Select
-                    onValueChange={(v) => {
-                      field.onChange(v === "none" ? "" : v);
-                      form.setValue("assigneeId", "");
-                      form.setValue("milestoneId", "");
-                      form.setValue("dependencyIds", []);
-                    }}
-                    value={field.value || "none"}
-                    disabled={!!taskId || !!parentId}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select project" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">None / General Task</SelectItem>
-                      {projects.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name="assigneeId"
@@ -212,11 +171,28 @@ export function TaskForm({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Unassigned</SelectItem>
-                      {assignableUsers.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name} {u.designation ? `(${u.designation})` : ""}
-                        </SelectItem>
-                      ))}
+                      {[
+                        { level: 1, name: 'Head / Manager' },
+                        { level: 2, name: 'Lead / Senior' },
+                        { level: 3, name: 'Staff / Executive' },
+                        { level: 4, name: 'Sub-role / Intern' }
+                      ].map(lvl => {
+                        const usersInLevel = assignableUsers.filter(u => (u.hierarchyLevel || 4) === lvl.level);
+                        if (usersInLevel.length === 0) return null;
+                        
+                        return (
+                          <SelectGroup key={lvl.level}>
+                            <SelectLabel className="font-semibold text-slate-700 bg-slate-50 sticky top-0">
+                              {lvl.name}
+                            </SelectLabel>
+                            {usersInLevel.map((u) => (
+                              <SelectItem key={u.id} value={u.id} className="pl-6 text-slate-600">
+                                {u.name} {u.designation && u.designation !== u.name ? `(${u.designation})` : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -337,10 +313,42 @@ export function TaskForm({
                 )}
               />
             )}
-            <div className="flex items-end justify-end md:col-span-2">
-              <Button type="submit" disabled={pending}>
-                {pending && <Loader2 className="size-4 animate-spin" />}
-                {taskId ? "Save changes" : parentId ? "Add subtask" : "Create task"}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <div className="rounded-md border border-slate-200 overflow-hidden bg-white">
+                      <ReactQuill
+                        theme="snow"
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="min-h-[300px]"
+                        modules={{
+                          toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                            ['link', 'image', 'video'],
+                            ['clean']
+                          ]
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-end justify-end md:col-span-2 space-x-4 pt-4">
+              <Button type="button" variant="secondary" onClick={() => router.back()} disabled={pending}>
+                Discard
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={pending}>
+                {pending && <Loader2 className="size-4 animate-spin mr-2" />}
+                Submit
               </Button>
             </div>
           </CardContent>

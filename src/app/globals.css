@@ -138,3 +138,7 @@
     @apply font-sans;
   }
 }
+
+.ql-editor {
+  min-height: 300px;
+}

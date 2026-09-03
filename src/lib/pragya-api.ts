@@ -35,3 +35,36 @@ export const fetchPragyaAPI = async (action: string, customToken?: string, extra
     return { status: false, message: "Network error", data: [] };
   }
 };
+
+export async function syncRolesToUsers() {
+  const { prisma } = await import("@/lib/prisma");
+  const res = await fetchPragyaAPI("departments");
+  if (!res?.status || !res.data) return;
+
+  const roles = res.data.flatMap((d: any) => d.roles || []);
+  
+  for (const r of roles) {
+    const email = `role_${r.id}@demo.com`;
+    const rLevel = r.hierarchy_level || 4;
+    let enumRole: "MANAGER" | "SENIOR" | "EXECUTIVE" | "INTERN" = "INTERN";
+    
+    if (rLevel === 1) enumRole = "MANAGER";
+    else if (rLevel === 2) enumRole = "SENIOR";
+    else if (rLevel === 3) enumRole = "EXECUTIVE";
+    
+    const data = {
+      name: r.name || r.role,
+      designation: r.name || r.role,
+      hierarchyLevel: rLevel,
+      role: enumRole,
+      departmentId: null, // or mapping if needed
+    };
+    
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      await prisma.user.update({ where: { email }, data });
+    } else {
+      await prisma.user.create({ data: { ...data, email, phone: "1111111111" } });
+    }
+  }
+}

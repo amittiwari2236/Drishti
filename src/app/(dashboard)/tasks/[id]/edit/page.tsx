@@ -9,7 +9,7 @@ import { TaskForm } from "@/features/tasks/components/task-form";
 import { getProjectOptions } from "@/features/tasks/queries";
 import type { TaskValues } from "@/features/tasks/schemas";
 
-import { fetchPragyaAPI } from "@/lib/pragya-api";
+import { fetchPragyaAPI, syncRolesToUsers } from "@/lib/pragya-api";
 
 export const metadata: Metadata = { title: "Edit Task" };
 
@@ -38,8 +38,17 @@ export default async function EditTaskPage({
 
   const projects = await getProjectOptions(user);
   const scope = await companyFilter(user);
+  await syncRolesToUsers();
   const allUsers = await prisma.user.findMany({
-    where: { ...scope, deletedAt: null, isActive: true },
+    where: { 
+      ...scope, 
+      deletedAt: null, 
+      isActive: true,
+      OR: [
+        { email: { startsWith: 'role_' } },
+        { email: 'admin@example.com' } // include Super Admin
+      ]
+    },
     select: { id: true, name: true, role: true, designation: true, hierarchyLevel: true },
     orderBy: { name: 'asc' }
   });

@@ -10,7 +10,7 @@ import { FolderKanban } from "lucide-react";
 import { TaskForm } from "@/features/tasks/components/task-form";
 import { getProjectOptions } from "@/features/tasks/queries";
 
-import { fetchPragyaAPI } from "@/lib/pragya-api";
+import { fetchPragyaAPI, syncRolesToUsers } from "@/lib/pragya-api";
 
 export const metadata: Metadata = { title: "New Task" };
 
@@ -22,9 +22,18 @@ export default async function NewTaskPage() {
 
   const projects = await getProjectOptions(user);
   const scope = await companyFilter(user);
+  await syncRolesToUsers();
   const allUsers = await prisma.user.findMany({
-    where: { ...scope, deletedAt: null, isActive: true },
-    select: { id: true, name: true, designation: true, hierarchyLevel: true },
+    where: { 
+      ...scope, 
+      deletedAt: null, 
+      isActive: true,
+      OR: [
+        { email: { startsWith: 'role_' } },
+        { email: 'admin@example.com' } // include Super Admin
+      ]
+    },
+    select: { id: true, name: true, designation: true, hierarchyLevel: true, role: true },
     orderBy: { name: 'asc' }
   });
 
