@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { markTaskAsReview } from "@/features/tasks/actions";
-import { TaskStatus } from "@prisma/client";
+import type { TaskStatus } from "@prisma/client";
 
 interface Props {
   taskId: string;
