@@ -34,25 +34,5 @@ export function TaskApprovalButtons({ taskId }: { taskId: string }) {
     }
   };
 
-  return (
-    <>
-      <Button
-        variant="default"
-        className="bg-emerald-600 hover:bg-emerald-700"
-        onClick={handleApprove}
-        disabled={isApproving || isDeclining}
-      >
-        <CheckCircle className="mr-2 size-4" />
-        {isApproving ? "Approving..." : "Approve"}
-      </Button>
-      <Button
-        variant="destructive"
-        onClick={handleDecline}
-        disabled={isApproving || isDeclining}
-      >
-        <XCircle className="mr-2 size-4" />
-        {isDeclining ? "Declining..." : "Decline"}
-      </Button>
-    </>
-  );
+  return null;
 }

@@ -28,6 +28,7 @@ import {
 import { DeleteTaskButton } from "@/features/tasks/components/delete-task-button";
 import { TaskStateButtons } from "@/features/tasks/components/task-state-buttons";
 import { TaskApprovalButtons } from "@/features/tasks/components/task-approval-buttons";
+import { AutoViewTracker } from "@/features/tasks/components/auto-view-tracker";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Task" };
@@ -121,6 +122,7 @@ export default async function TaskDetailPage({
 
   return (
     <div className="space-y-6">
+      <AutoViewTracker taskId={task.id} status={task.status} isAssignee={isAssignee} />
       <PageHeader
         title={
           <span className="flex items-center gap-2">

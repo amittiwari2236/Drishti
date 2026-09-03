@@ -32,40 +32,29 @@ export function TaskStateButtons({
     }
   };
 
+  if (!isAssignee || status === "COMPLETED" || status === "CANCELLED") {
+    return null;
+  }
+
   return (
-    <div className="flex gap-2">
-      {status === "PENDING" && isAssignee && (
-        <Button
-          onClick={() => handleAction(() => markTaskAsReview(taskId), "Task submitted for review")}
-          disabled={isUpdating}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <ClipboardCheck className="mr-2 size-4" />
-          {isUpdating ? "Submitting..." : "Submit for Review"}
-        </Button>
-      )}
+    <div className="flex w-full justify-between items-center mt-4">
+      <Button
+        onClick={() => handleAction(() => completeTask(taskId), "Task completed")}
+        disabled={isUpdating}
+        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+      >
+        <CheckCircle2 className="mr-2 size-4" />
+        {isUpdating ? "Processing..." : "Complete Task"}
+      </Button>
 
-      {status === "REVIEW" && canEdit && (
-        <Button
-          onClick={() => handleAction(() => completeTask(taskId), "Task completed")}
-          disabled={isUpdating}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-        >
-          <CheckCircle2 className="mr-2 size-4" />
-          {isUpdating ? "Completing..." : "Mark as Completed"}
-        </Button>
-      )}
-
-      {status !== "CANCELLED" && status !== "COMPLETED" && canEdit && (
-        <Button
-          onClick={() => handleAction(() => cancelTask(taskId), "Task cancelled")}
-          disabled={isUpdating}
-          variant="destructive"
-        >
-          <XCircle className="mr-2 size-4" />
-          {isUpdating ? "Cancelling..." : "Cancel Task"}
-        </Button>
-      )}
+      <Button
+        onClick={() => handleAction(() => cancelTask(taskId), "Task cancelled")}
+        disabled={isUpdating}
+        variant="destructive"
+      >
+        <XCircle className="mr-2 size-4" />
+        {isUpdating ? "Processing..." : "Cancel"}
+      </Button>
     </div>
   );
 }

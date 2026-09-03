@@ -153,7 +153,8 @@ export default async function DashboardPage() {
       where: { ...scope },
       include: { tasks: true }
     });
-  } else if (isLead) {
+  } else {
+    // Strict non-admin visibility: My Tasks or Tasks I Assigned
     if (dbUser?.departmentId) {
       const members = await prisma.user.findMany({
         where: { departmentId: dbUser.departmentId, ...scope } as any
@@ -163,22 +164,18 @@ export default async function DashboardPage() {
         displayRole: pragyaRoleNames[idx % pragyaRoleNames.length]
       }));
     }
-    const memberIds = teamMembers.map(m => m.id);
+
     roleTasks = await prisma.task.findMany({
-      where: { assigneeId: { in: [...memberIds, user.id] }, ...scope },
+      where: {
+        ...scope,
+        OR: [
+          { assigneeId: user.id },
+          { createdById: user.id }
+        ]
+      },
       include: { assignee: true }
     });
-    const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId).filter(Boolean))) as string[];
-    roleProjects = await prisma.project.findMany({
-      where: { id: { in: projectIds } },
-      include: { tasks: true }
-    });
-  } else {
-    // Member View
-    roleTasks = await prisma.task.findMany({
-      where: { assigneeId: user.id, ...scope },
-      include: { assignee: true }
-    });
+    
     const projectIds = Array.from(new Set(roleTasks.map(t => t.projectId).filter(Boolean))) as string[];
     roleProjects = await prisma.project.findMany({
       where: { id: { in: projectIds } },

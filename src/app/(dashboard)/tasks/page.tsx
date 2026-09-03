@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { TasksTable, type TaskRow } from "@/features/tasks/components/tasks-table";
 import { TasksFilters } from "@/features/tasks/components/tasks-filters";
 import { TASK_STATUSES } from "@/features/tasks/schemas";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const metadata: Metadata = { title: "Tasks" };
 
@@ -31,20 +32,12 @@ export default async function TasksPage({
     ? (status as TaskStatus)
     : undefined;
 
-  const where: Prisma.TaskWhereInput = {
+  const isAdmin = user.hierarchyLevel === 1 || user.role === "MANAGER";
+
+  const baseWhere: Prisma.TaskWhereInput = {
     deletedAt: null,
     ...(projectId ? { projectId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
-    ...(user.hierarchyLevel === 1 
-      ? {} 
-      : { 
-          OR: [
-            { assigneeId: user.id },
-            { createdById: user.id },
-            { assignee: { hierarchyLevel: { gte: user.hierarchyLevel || 4 } } }
-          ]
-        } 
-      ),
     ...(isPendingFilter
       ? { approval: { status: "PENDING" } }
       : {
@@ -53,6 +46,19 @@ export default async function TasksPage({
             { approval: { status: "APPROVED" } },
           ],
         }),
+  };
+
+  const where: Prisma.TaskWhereInput = {
+    ...baseWhere,
+    ...(isAdmin 
+      ? {} 
+      : { 
+          OR: [
+            { assigneeId: user.id },
+            { createdById: user.id }
+          ]
+        } 
+      ),
   };
 
   const [projects, tasks] = await Promise.all([
@@ -78,7 +84,7 @@ export default async function TasksPage({
     }),
   ]);
 
-  const rows: TaskRow[] = tasks.map((t) => ({
+  const mapToRow = (t: any): TaskRow => ({
     id: t.id,
     title: t.title,
     projectName: t.project?.name ?? "General Task",
@@ -88,7 +94,11 @@ export default async function TasksPage({
     assigneeImage: t.assignee?.image ?? null,
     deadline: t.deadline?.toISOString() ?? null,
     subtaskCount: t._count.subtasks,
-  }));
+  });
+
+  const allRows = tasks.map(mapToRow);
+  const myRows = tasks.filter(t => t.assigneeId === user.id).map(mapToRow);
+  const assignedRows = tasks.filter(t => t.createdById === user.id && t.assigneeId !== user.id).map(mapToRow);
 
   const canCreate = can(user, "task:create") || can(user, "task:assign");
 
@@ -96,14 +106,14 @@ export default async function TasksPage({
     <>
       <PageHeader
         title="Tasks"
-        description="Every task across your projects. Filter by project or status."
+        description="View and manage tasks across your projects."
         actions={
           <>
             <TasksFilters
               projects={projects}
               project={projectId ?? ""}
               status={statusFilter ?? (isPendingFilter ? "pending_approval" : "")}
-              showPendingOption={user.role === "MANAGER"}
+              showPendingOption={isAdmin}
             />
             {canCreate && (
               <Button asChild>
@@ -115,7 +125,25 @@ export default async function TasksPage({
           </>
         }
       />
-      <TasksTable data={rows} />
+      
+      {isAdmin ? (
+        <TasksTable data={allRows} />
+      ) : (
+        <div className="space-y-4">
+          <Tabs defaultValue="my_tasks">
+            <TabsList>
+              <TabsTrigger value="my_tasks">My Tasks ({myRows.length})</TabsTrigger>
+              <TabsTrigger value="assigned_tasks">Tasks I Assigned ({assignedRows.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="my_tasks" className="mt-4">
+              <TasksTable data={myRows} />
+            </TabsContent>
+            <TabsContent value="assigned_tasks" className="mt-4">
+              <TasksTable data={assignedRows} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </>
   );
 }

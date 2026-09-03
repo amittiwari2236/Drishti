@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { KanbanBoard, type KanbanTask } from "@/features/kanban/kanban-board";
 import { ProjectFilter } from "@/features/kanban/project-filter";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const metadata: Metadata = { title: "Event Track (Kanban)" };
 
@@ -37,30 +38,33 @@ export default async function KanbanPage({
     orderBy: { name: "asc" },
   });
 
+  const isAdmin = user.hierarchyLevel === 1 || user.role === "MANAGER";
+
+  const baseWhere: Prisma.TaskWhereInput = {
+    parentId: null,
+    deletedAt: null,
+    ...(projectId ? { projectId } : {}),
+    OR: [
+      { approval: null },
+      { approval: { status: { in: ["APPROVED", "DECLINED"] } } },
+    ],
+  };
+
+  const where: Prisma.TaskWhereInput = {
+    ...baseWhere,
+    ...(isAdmin 
+      ? {} 
+      : { 
+          OR: [
+            { assigneeId: user.id },
+            { createdById: user.id }
+          ]
+        } 
+      ),
+  };
+
   const tasks = await prisma.task.findMany({
-    where: {
-      parentId: null,
-      deletedAt: null,
-      ...(projectId ? { projectId } : {}),
-      ...(user.hierarchyLevel === 1 
-        ? {} 
-        : { 
-            AND: [
-              {
-                OR: [
-                  { assigneeId: user.id },
-                  { createdById: user.id },
-                  { assignee: { hierarchyLevel: { gte: user.hierarchyLevel || 4 } } }
-                ]
-              }
-            ]
-          } 
-        ),
-      OR: [
-        { approval: null },
-        { approval: { status: { in: ["APPROVED", "DECLINED"] } } },
-      ],
-    },
+    where,
     include: {
       project: { select: { id: true, name: true } },
       approval: { select: { status: true } },
@@ -78,7 +82,7 @@ export default async function KanbanPage({
     orderBy: { order: "asc" },
   });
 
-  const boardTasks: KanbanTask[] = tasks.map((t) => ({
+  const mapToKanbanTask = (t: any): KanbanTask => ({
     id: t.id,
     title: t.title,
     description: t.description,
@@ -99,7 +103,11 @@ export default async function KanbanPage({
         }
       : null,
     subtaskCount: t._count.subtasks,
-  }));
+  });
+
+  const allBoardTasks = tasks.map(mapToKanbanTask);
+  const myBoardTasks = tasks.filter(t => t.assigneeId === user.id).map(mapToKanbanTask);
+  const assignedBoardTasks = tasks.filter(t => t.createdById === user.id && t.assigneeId !== user.id).map(mapToKanbanTask);
 
   const canCreate = can(user, "task:create") || can(user, "task:assign");
   const canMove =
@@ -125,11 +133,37 @@ export default async function KanbanPage({
           </>
         }
       />
-      <KanbanBoard
-        key={projectId ?? "all"}
-        initialTasks={boardTasks}
-        canMove={canMove}
-      />
+      
+      {isAdmin ? (
+        <KanbanBoard
+          key={projectId ?? "all"}
+          initialTasks={allBoardTasks}
+          canMove={canMove}
+        />
+      ) : (
+        <div className="space-y-4">
+          <Tabs defaultValue="my_tasks">
+            <TabsList>
+              <TabsTrigger value="my_tasks">My Tasks</TabsTrigger>
+              <TabsTrigger value="assigned_tasks">Tasks I Assigned</TabsTrigger>
+            </TabsList>
+            <TabsContent value="my_tasks" className="mt-4 border-none p-0">
+              <KanbanBoard
+                key={`my_${projectId ?? "all"}`}
+                initialTasks={myBoardTasks}
+                canMove={canMove}
+              />
+            </TabsContent>
+            <TabsContent value="assigned_tasks" className="mt-4 border-none p-0">
+              <KanbanBoard
+                key={`assigned_${projectId ?? "all"}`}
+                initialTasks={assignedBoardTasks}
+                canMove={canMove}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </>
   );
 }
