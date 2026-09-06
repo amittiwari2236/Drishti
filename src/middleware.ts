@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
 
 const PUBLIC_PREFIXES = [
   "/login",
@@ -15,7 +14,9 @@ export function middleware(request: NextRequest) {
   const isPublic =
     pathname === "/" ||
     PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
-  const sessionCookie = getSessionCookie(request);
+  const sessionCookie =
+    request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session_token")?.value;
 
   if (!isPublic && !sessionCookie) {
     const url = new URL("/login", request.url);
