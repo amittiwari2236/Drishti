@@ -17,6 +17,81 @@ const createDepartmentSchema = z.object({
 
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;
 
+import { auth } from "@/lib/auth";
+
+export async function ensureDepartmentOfficer(dept: { id: string; name: string; code: string }) {
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      departmentId: dept.id,
+      role: "DEPARTMENT",
+      isActive: true,
+    },
+    select: { id: true, name: true, email: true },
+  });
+
+  if (existingUser) {
+    return { id: dept.id, name: dept.name, code: dept.code, email: existingUser.email };
+  }
+
+  const cleanCode = dept.code.toLowerCase().replace(/[^a-z0-9]/g, "");
+  let targetEmail = `dept-${cleanCode}@example.com`;
+
+  if (dept.code.toUpperCase() === "DEPT-1") targetEmail = "dept1@example.com";
+  if (dept.code.toUpperCase() === "DEPT-2") targetEmail = "dept2@example.com";
+
+  const emailExists = await prisma.user.findUnique({ where: { email: targetEmail } });
+  if (emailExists) {
+    targetEmail = `dept-${cleanCode}-${dept.id.slice(-4)}@example.com`;
+  }
+
+  const res = await auth.api.signUpEmail({
+    body: {
+      email: targetEmail,
+      password: "Password@123",
+      name: `${dept.name} Officer`,
+    },
+  });
+
+  if (res?.user?.id) {
+    await prisma.user.update({
+      where: { id: res.user.id },
+      data: {
+        role: "DEPARTMENT",
+        emailVerified: true,
+        departmentId: dept.id,
+      },
+    });
+  }
+
+  return { id: dept.id, name: dept.name, code: dept.code, email: targetEmail };
+}
+
+/** Fetch all departments with guaranteed officer credentials for login auto-fill */
+export async function getLoginDepartments() {
+  try {
+    const depts = await prisma.department.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, code: true },
+    });
+
+    const list = await Promise.all(
+      depts.map(async (d) => {
+        try {
+          return await ensureDepartmentOfficer(d);
+        } catch (e) {
+          console.error(`Failed to ensure officer for dept ${d.code}:`, e);
+          const cleanCode = d.code.toLowerCase().replace(/[^a-z0-9]/g, "");
+          return { id: d.id, name: d.name, code: d.code, email: `dept-${cleanCode}@example.com` };
+        }
+      })
+    );
+    return list;
+  } catch (err) {
+    console.error("Failed to get login departments:", err);
+    return [];
+  }
+}
+
 /** SENIOR_DECISION_MAKER only: create a new department under a ministry. */
 export async function createDepartment(input: CreateDepartmentInput) {
   await requireRole("SENIOR_DECISION_MAKER");
@@ -46,7 +121,7 @@ export async function createDepartment(input: CreateDepartmentInput) {
   });
   if (!ministry) throw new Error("Selected ministry does not exist.");
 
-  await prisma.department.create({
+  const dept = await prisma.department.create({
     data: {
       name: name.trim(),
       code: code.trim().toUpperCase(),
@@ -54,6 +129,11 @@ export async function createDepartment(input: CreateDepartmentInput) {
     },
   });
 
+  // Automatically provision default Department Officer account
+  await ensureDepartmentOfficer(dept);
+
   revalidatePath("/departments");
   revalidatePath("/ministries");
+  revalidatePath("/login");
 }
+

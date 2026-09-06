@@ -97,7 +97,7 @@ export function DelayReasonChart({ data }: { data: DelayCategoryStat[] }) {
               />
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(val: number, name: string) => [
+                formatter={(val: any, name: any) => [
                   name === "days" ? `${val} days` : `${val} reports`,
                   name === "days" ? "Estimated Delay" : "Frequency",
                 ]}

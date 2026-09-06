@@ -5,6 +5,7 @@ import { LoginForm } from "@/features/auth/components/login-form";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getLoginDepartments } from "@/features/departments/actions";
 
 export const metadata: Metadata = { title: "Sign in - DRISHTI" };
 
@@ -21,6 +22,8 @@ export default async function LoginPage() {
   if (session) {
     redirect("/dashboard");
   }
+
+  const departments = await getLoginDepartments();
 
   return (
     <div className="grid min-h-svh sm:grid-cols-2">
@@ -47,7 +50,7 @@ export default async function LoginPage() {
           {/* Card */}
           <div className="rounded-2xl border border-border/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm shadow-xl shadow-black/[0.06] p-7 space-y-6">
             <Suspense>
-              <LoginForm />
+              <LoginForm departments={departments} />
             </Suspense>
           </div>
 

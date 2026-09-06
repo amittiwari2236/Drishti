@@ -78,7 +78,7 @@ export function ProgressTrendChart({
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
-                  formatter={(val: any, name: string) => [
+                  formatter={(val: any, name: any) => [
                     `${typeof val === "number" ? val.toFixed(1) : val}%`,
                     name === "actualProgress" ? "Actual Progress" : "Planned Expected",
                   ]}
@@ -148,7 +148,7 @@ export function ProgressTrendChart({
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
-                  formatter={(val: number) => [`₹${val.toLocaleString()} Cr`, "Cumulative Expenditure"]}
+                  formatter={(val: any) => [`₹${Number(val ?? 0).toLocaleString()} Cr`, "Cumulative Expenditure"]}
                 />
                 <Area
                   type="monotone"
