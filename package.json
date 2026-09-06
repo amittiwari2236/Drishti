@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed",
+    "db:seed": "node prisma/seed.mjs",
     "db:dev": "node scripts/db.mjs"
   },
   "dependencies": {
@@ -65,6 +65,6 @@
     "typescript": "^5"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node prisma/seed.mjs"
   }
 }

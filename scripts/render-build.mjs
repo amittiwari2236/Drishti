@@ -13,12 +13,15 @@ try {
 
 console.log("🌱 [Render Build] Step 3/4: Seeding DRISHTI master data & demo accounts...");
 try {
-  execSync("npx prisma db seed", { stdio: "inherit" });
+  execSync("node prisma/seed.mjs", { stdio: "inherit" });
 } catch (error) {
   console.warn("⚠️ [Render Build] Seed warning (ignored if data already exists):", error.message);
 }
 
 console.log("⚡ [Render Build] Step 4/4: Building Next.js production application...");
-execSync("npx next build", { stdio: "inherit" });
+execSync("npx next build", {
+  stdio: "inherit",
+  env: { ...process.env, NODE_OPTIONS: "--max-old-space-size=450" },
+});
 
 console.log("✅ [Render Build] Build completed successfully!");
