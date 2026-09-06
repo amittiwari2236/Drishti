@@ -1,0 +1,1222 @@
+{
+  "model_version": "rf-v1.0",
+  "algorithm": "Random Forest Classifier (Ensemble)",
+  "n_estimators": 100,
+  "accuracy": 1.0,
+  "feature_names": [
+    "progress_gap",
+    "progress_velocity",
+    "cost_overrun_pct",
+    "expenditure_pct",
+    "delayed_milestones",
+    "total_delay_days",
+    "delay_flag_count"
+  ],
+  "feature_importances": {
+    "progress_gap": 0.2232,
+    "progress_velocity": 0.2054,
+    "cost_overrun_pct": 0.1071,
+    "expenditure_pct": 0.0089,
+    "delayed_milestones": 0.0446,
+    "total_delay_days": 0.2321,
+    "delay_flag_count": 0.1786
+  },
+  "trees": [
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.095,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 6,
+        "feature_name": "delay_flag_count",
+        "threshold": 1.5,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.14,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 9.8,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 9.8,
+      "left": {
+        "feature_idx": 0,
+        "feature_name": "progress_gap",
+        "threshold": 13.595,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 38.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 32.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.33,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.62,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 9.86,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 9.86,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.33,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.175,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.495,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 4,
+      "feature_name": "delayed_milestones",
+      "threshold": 0.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 4,
+        "feature_name": "delayed_milestones",
+        "threshold": 1.5,
+        "left": {
+          "feature_idx": 3,
+          "feature_name": "expenditure_pct",
+          "threshold": 49.62,
+          "left": {
+            "value": 1.0
+          },
+          "right": {
+            "feature_idx": 5,
+            "feature_name": "total_delay_days",
+            "threshold": 32.0,
+            "left": {
+              "value": 0.0
+            },
+            "right": {
+              "value": 1.0
+            }
+          }
+        },
+        "right": {
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.275,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.175,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.03,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 6,
+        "feature_name": "delay_flag_count",
+        "threshold": 1.5,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.165,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 27.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 4,
+      "feature_name": "delayed_milestones",
+      "threshold": 0.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 1,
+        "feature_name": "progress_velocity",
+        "threshold": 1.275,
+        "left": {
+          "value": 1.0
+        },
+        "right": {
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.71,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 9.86,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.355,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.185,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.355,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 32.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.33,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 4,
+      "feature_name": "delayed_milestones",
+      "threshold": 0.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 1,
+        "feature_name": "progress_velocity",
+        "threshold": 1.58,
+        "left": {
+          "value": 1.0
+        },
+        "right": {
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.035,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.71,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 27.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.185,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.185,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.835,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.175,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.355,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.16,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.035,
+      "left": {
+        "feature_idx": 0,
+        "feature_name": "progress_gap",
+        "threshold": 13.57,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      },
+      "right": {
+        "feature_idx": 6,
+        "feature_name": "delay_flag_count",
+        "threshold": 1.5,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.08,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 2,
+      "feature_name": "cost_overrun_pct",
+      "threshold": 10.035,
+      "left": {
+        "feature_idx": 5,
+        "feature_name": "total_delay_days",
+        "threshold": 82.5,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 27.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.135,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 4,
+      "feature_name": "delayed_milestones",
+      "threshold": 0.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "feature_idx": 5,
+        "feature_name": "total_delay_days",
+        "threshold": 30.0,
+        "left": {
+          "value": 0.0
+        },
+        "right": {
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 7.185,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.175,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.85,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 5,
+      "feature_name": "total_delay_days",
+      "threshold": 30.0,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.185,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 1,
+      "feature_name": "progress_velocity",
+      "threshold": 1.15,
+      "left": {
+        "value": 1.0
+      },
+      "right": {
+        "value": 0.0
+      }
+    },
+    {
+      "feature_idx": 0,
+      "feature_name": "progress_gap",
+      "threshold": 6.745,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    },
+    {
+      "feature_idx": 6,
+      "feature_name": "delay_flag_count",
+      "threshold": 1.5,
+      "left": {
+        "value": 0.0
+      },
+      "right": {
+        "value": 1.0
+      }
+    }
+  ]
+}

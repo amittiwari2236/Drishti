@@ -1,0 +1,335 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────── ENUMS ───────────────────────────
+
+enum Role {
+  SENIOR_DECISION_MAKER
+  DEPARTMENT
+  AGENCY
+}
+
+enum ProjectStatus {
+  PLANNING
+  APPROVED
+  UNDER_IMPLEMENTATION
+  ON_TRACK
+  DELAYED
+  CRITICAL
+  COMPLETED
+  SUSPENDED
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+}
+
+// ─────────────────────── AUTH (Better Auth) ───────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          Role      @default(AGENCY)
+  isActive      Boolean   @default(true)
+  lastActiveAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Scope links — set for DEPARTMENT and AGENCY role users
+  departmentId  String?
+  department    Department?         @relation("UserDepartment", fields: [departmentId], references: [id])
+  agencyId      String?
+  agency        ImplementingAgency? @relation("UserAgency", fields: [agencyId], references: [id])
+
+  sessions         Session[]
+  accounts         Account[]
+  progressUpdates  ProjectProgressUpdate[] @relation("submittedBy")
+  reviewedUpdates  ProjectProgressUpdate[] @relation("reviewedBy")
+  notifications    Notification[]
+
+  @@index([role])
+  @@index([departmentId])
+  @@index([agencyId])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  issuer                String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ──────────────────────── GOVERNMENT DOMAIN ────────────────────────
+
+model Zone {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  states      State[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("zone")
+}
+
+model State {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique
+  zoneId    String
+  zone      Zone     @relation(fields: [zoneId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agencies ImplementingAgency[]
+  projects InfrastructureProject[]
+
+  @@index([zoneId])
+  @@map("state")
+}
+
+model Ministry {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  code        String       @unique
+  departments Department[]
+  projects    InfrastructureProject[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("ministry")
+}
+
+model Department {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  code       String   @unique
+  ministryId String
+  ministry   Ministry @relation(fields: [ministryId], references: [id])
+  agencies   ImplementingAgency[]
+  projects   InfrastructureProject[]
+  users      User[]   @relation("UserDepartment")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([ministryId])
+  @@map("department")
+}
+
+model ImplementingAgency {
+  id           String     @id @default(cuid())
+  name         String     @unique
+  code         String     @unique
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  stateId      String?
+  state        State?     @relation(fields: [stateId], references: [id])
+  projects     InfrastructureProject[]
+  users        User[]     @relation("UserAgency")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([departmentId])
+  @@index([stateId])
+  @@map("implementing_agency")
+}
+
+model Sector {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  projects    InfrastructureProject[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("sector")
+}
+
+model InfrastructureProject {
+  id                     String        @id @default(cuid())
+  projectId              String        @unique // PAIMANA/external ID
+  projectName            String
+  description            String?
+  stateId                String
+  state                  State         @relation(fields: [stateId], references: [id])
+  ministryId             String
+  ministry               Ministry      @relation(fields: [ministryId], references: [id])
+  departmentId           String?
+  department             Department?   @relation(fields: [departmentId], references: [id])
+  agencyId               String?
+  agency                 ImplementingAgency? @relation(fields: [agencyId], references: [id])
+  sectorId               String
+  sector                 Sector        @relation(fields: [sectorId], references: [id])
+  
+  originalCost           Float         // in crores
+  revisedCost            Float?
+  expenditure            Float         @default(0)
+  physicalProgress       Float         @default(0)
+  projectStatus          ProjectStatus @default(PLANNING)
+  
+  startDate              DateTime?     @db.Date
+  plannedCompletionDate  DateTime?     @db.Date
+  expectedCompletionDate DateTime?     @db.Date
+  
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  deletedAt              DateTime?
+  
+  milestones             ProjectMilestone[]
+  progressUpdates        ProjectProgressUpdate[]
+  riskPredictions        RiskPrediction[]
+
+  @@index([stateId])
+  @@index([ministryId])
+  @@index([departmentId])
+  @@index([agencyId])
+  @@index([sectorId])
+  @@index([projectStatus])
+  @@map("infrastructure_project")
+}
+
+model ProjectMilestone {
+  id          String          @id @default(cuid())
+  projectId   String
+  project     InfrastructureProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  plannedDate DateTime?       @db.Date
+  actualDate  DateTime?       @db.Date
+  status      MilestoneStatus @default(PENDING)
+  remarks     String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+
+  @@index([projectId])
+  @@map("project_milestone")
+}
+
+model ProjectProgressUpdate {
+  id                String                @id @default(cuid())
+  projectId         String
+  project           InfrastructureProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reportingDate     DateTime              @db.Date
+  physicalProgress  Float
+  financialProgress Float?
+  expenditure       Float
+  remarks           String?
+  
+  // Audit — who submitted
+  updatedById       String?
+  updatedBy         User?                 @relation("submittedBy", fields: [updatedById], references: [id])
+  submittedByRole   Role?                 // role at time of submission
+  
+  // Review — Department user who reviewed
+  reviewedById      String?
+  reviewedBy        User?                 @relation("reviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt        DateTime?
+  reviewRemarks     String?
+
+  // Delay capture (all optional — backward compatible)
+  delayCategory     String?               // e.g. "Weather / Natural Calamity"
+  delayReason       String?               // free-text explanation
+  delayDays         Int?                  // estimated delay in days
+  
+  createdAt         DateTime              @default(now())
+  deletedAt         DateTime?
+
+  @@index([projectId])
+  @@index([reportingDate])
+  @@map("project_progress_update")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notification")
+}
+
+// ── Predictive Monitoring ─────────────────────────────────────────────────────
+
+model RiskPrediction {
+  id               String               @id @default(cuid())
+  projectId        String
+  project          InfrastructureProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  predictionDate   DateTime             @default(now())
+
+  // ML output — null when model is not connected
+  delayProbability Float?               // 0.0–1.0
+  riskLevel        String?              // "LOW" | "MEDIUM" | "HIGH"
+  modelVersion     String?              // e.g. "rf-v1.0"
+
+  // Serialised feature vector used as input to the model
+  indicators       Json?
+
+  createdAt        DateTime             @default(now())
+
+  @@index([projectId])
+  @@index([predictionDate])
+  @@map("risk_prediction")
+}
